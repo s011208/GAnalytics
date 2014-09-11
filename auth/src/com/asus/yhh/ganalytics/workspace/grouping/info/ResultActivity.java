@@ -30,6 +30,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,6 +41,7 @@ import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.BaseAdapter;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -56,9 +59,7 @@ public class ResultActivity extends Activity {
 
     private String mRawJsonData;
 
-    private AutoCompleteTextView mSearchText;
-
-    private SearchingTextAdapter mSearchingTextAdapter;
+    private EditText mSearchText;
 
     private ListView mPackageList;
 
@@ -191,8 +192,7 @@ public class ResultActivity extends Activity {
                 mReportListAdapter.notifyDataSetChanged();
                 mPackageListAdapter.setSelectedPosition(-1);
                 clearChart();
-                new GaParser(mPackageListAdapter, mSwipeRefreshLayout, mSearchingTextAdapter)
-                        .execute(mRawJsonData);
+                new GaParser(mPackageListAdapter, mSwipeRefreshLayout).execute(mRawJsonData);
             }
         });
         mSwipeRefreshLayout.setColorScheme(android.R.color.holo_blue_bright,
@@ -224,13 +224,23 @@ public class ResultActivity extends Activity {
         mReportList.setAdapter(mReportListAdapter);
         mReportSwitcher = (ViewSwitcher)findViewById(R.id.report_switcher);
         mReportSwitcher.setDisplayedChild(0);
-        mSearchText = (AutoCompleteTextView)findViewById(R.id.search_text);
-        mSearchingTextAdapter = new SearchingTextAdapter(this, android.R.layout.simple_list_item_1);
-        if (mSearchText != null) {
-            mSearchText.setAdapter(mSearchingTextAdapter);
-        }
-        new GaParser(mPackageListAdapter, mSwipeRefreshLayout, mSearchingTextAdapter)
-                .execute(mRawJsonData);
+        mSearchText = (EditText)findViewById(R.id.search_text);
+        mSearchText.addTextChangedListener(new TextWatcher() {
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                mPackageListAdapter.setFilter(s.toString());
+            }
+        });
+        new GaParser(mPackageListAdapter, mSwipeRefreshLayout).execute(mRawJsonData);
     }
 
     public void onResume() {
@@ -376,6 +386,10 @@ public class ResultActivity extends Activity {
 
         private Context mContext;
 
+        private boolean mIsFiltering = false;
+
+        private String mFilterText;
+
         public PackageListAdapter(Context context) {
             mContext = context;
             mInflater = (LayoutInflater)mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -390,6 +404,16 @@ public class ResultActivity extends Activity {
             mRelatedData.putAll(relatedData);
             mData.clear();
             mData.addAll(sortPkgs(mRelatedData));
+        }
+
+        public void setFilter(String text) {
+            if (text == null || text.isEmpty()) {
+                mIsFiltering = false;
+            } else {
+                mIsFiltering = true;
+            }
+            mFilterText = text;
+            notifyDataSetChanged();
         }
 
         public HashMap<ComponentName, ParsedData> getMapData() {
@@ -470,6 +494,18 @@ public class ResultActivity extends Activity {
             } else {
                 holder.mImg.setImageResource(R.drawable.widget);
             }
+            if (mIsFiltering) {
+                if (holder.mDetailed.getText().toString().toLowerCase()
+                        .contains(mFilterText.toLowerCase())
+                        || holder.mTitle.getText().toString().toLowerCase()
+                                .contains(mFilterText.toLowerCase())) {
+                    convertView.setVisibility(View.VISIBLE);
+                } else {
+                    convertView.setVisibility(View.INVISIBLE);
+                }
+            } else {
+                convertView.setVisibility(View.VISIBLE);
+            }
             return convertView;
         }
 
@@ -483,8 +519,6 @@ public class ResultActivity extends Activity {
     }
 
     public static class GaParser extends AsyncTask<String, Void, Void> {
-        private SearchingTextAdapter mSearchingTextAdapter;
-
         private PackageListAdapter mAdapter;
 
         private SwipeRefreshLayout mSwipeRefreshLayout;
@@ -493,15 +527,11 @@ public class ResultActivity extends Activity {
 
         private final HashMap<String, String> mSearchingText = new HashMap<String, String>();
 
-        public GaParser(PackageListAdapter adapter, SwipeRefreshLayout swipeRefreshLayout,
-                SearchingTextAdapter searchingTextAdapter) {
+        public GaParser(PackageListAdapter adapter, SwipeRefreshLayout swipeRefreshLayout) {
             mAdapter = adapter;
             mSwipeRefreshLayout = swipeRefreshLayout;
             mAdapter.setData(new HashMap<ComponentName, ParsedData>());
             mAdapter.notifyDataSetChanged();
-            mSearchingTextAdapter = searchingTextAdapter;
-            mSearchingTextAdapter.clearData();
-            mSearchingTextAdapter.notifyDataSetChanged();
         }
 
         @Override
@@ -603,12 +633,6 @@ public class ResultActivity extends Activity {
         protected void onPostExecute(Void params) {
             mAdapter.setData(mData);
             mAdapter.notifyDataSetChanged();
-            Iterator<String> iter = mSearchingText.keySet().iterator();
-            while (iter.hasNext()) {
-                String data = iter.next();
-                mSearchingTextAdapter.addData(data);
-            }
-            mSearchingTextAdapter.notifyDataSetChanged();
             mSwipeRefreshLayout.setRefreshing(false);
         }
     }
