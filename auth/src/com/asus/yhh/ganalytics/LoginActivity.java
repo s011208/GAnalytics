@@ -151,7 +151,6 @@ public class LoginActivity extends Activity {
         if (networkInfo != null && networkInfo.isConnected()) {
             return true;
         }
-        mDataTypeList.setEnabled(true);
         return false;
     }
 
@@ -166,6 +165,7 @@ public class LoginActivity extends Activity {
             } else {
                 updateCurrentInformation("please connect to Internet");
                 Toast.makeText(this, "No network connection available", Toast.LENGTH_SHORT).show();
+                mDataTypeList.setEnabled(true);
             }
         }
     }

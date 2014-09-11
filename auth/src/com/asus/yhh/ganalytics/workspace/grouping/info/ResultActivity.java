@@ -42,6 +42,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ViewSwitcher;
@@ -66,6 +67,9 @@ public class ResultActivity extends Activity {
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
     // report
+
+    private RelativeLayout mReportingView;
+
     private ViewSwitcher mReportSwitcher;
 
     private ListView mReportList;
@@ -75,6 +79,8 @@ public class ResultActivity extends Activity {
     private TextView mList, mPie;
 
     private LinearLayout mChartContainer;
+
+    private boolean mHideReportingView = false;
 
     private static int[] COLORS = new int[] {
             Color.GREEN, Color.BLUE, Color.MAGENTA, Color.CYAN, Color.LTGRAY, Color.RED,
@@ -170,6 +176,10 @@ public class ResultActivity extends Activity {
                 mPackageListAdapter.notifyDataSetChanged();
                 mReportList.smoothScrollToPosition(0);
                 rePainChart(data);
+                if (mHideReportingView) {
+                    mHideReportingView = false;
+                    mReportingView.setVisibility(View.VISIBLE);
+                }
             }
         });
         mSwipeRefreshLayout = (SwipeRefreshLayout)findViewById(R.id.swipe_container);
@@ -190,6 +200,7 @@ public class ResultActivity extends Activity {
                 android.R.color.holo_red_light);
         mSwipeRefreshLayout.setRefreshing(true);
         // report
+        mReportingView = (RelativeLayout)findViewById(R.id.reporting_view);
         mList = (TextView)findViewById(R.id.report_list);
         mList.setOnClickListener(new OnClickListener() {
             @Override
@@ -227,6 +238,19 @@ public class ResultActivity extends Activity {
         mChartView = ChartFactory.getPieChartView(this, mSeries, mRenderer);
         mRenderer.setClickEnabled(true);
         mChartContainer.addView(mChartView);
+    }
+
+    public void onBackPressed() {
+        if (mReportingView != null) {
+            if (mHideReportingView == false) {
+                mHideReportingView = true;
+                mReportingView.setVisibility(View.GONE);
+            } else {
+                super.onBackPressed();
+            }
+        } else {
+            super.onBackPressed();
+        }
     }
 
     private static HashMap<ComponentName, Integer> sortByValues(HashMap<ComponentName, Integer> map) {
@@ -316,8 +340,9 @@ public class ResultActivity extends Activity {
             }
             ComponentName item = getItem(position);
             int count = mCounts.get(position);
-            PackageMatcher.getInstance(mContext)
-                    .setTitle(holder.mtxt, count, item.getPackageName());
+            holder.mtxt.setTag(position);
+            PackageMatcher.getInstance(mContext).setTitle(holder.mtxt, count,
+                    item.getPackageName(), position);
             ParsedData pData = mRelatedData.get(item);
             if (pData != null) {
                 if (pData.mType == ParsedData.TYPE_SHORTCUT) {
@@ -424,8 +449,9 @@ public class ResultActivity extends Activity {
             }
             ComponentName item = getItem(position);
             ParsedData pData = mRelatedData.get(item);
+            holder.mTitle.setTag(position);
             PackageMatcher.getInstance(mContext).setTitle(holder.mTitle, pData.meetCount,
-                    item.getPackageName());
+                    item.getPackageName(), position);
             if (mSelectedPosition == position) {
                 if (pData.mType == ParsedData.TYPE_SHORTCUT) {
                     holder.mTitle.setTextColor(Color.argb(150, 52, 139, 254));
@@ -508,10 +534,6 @@ public class ResultActivity extends Activity {
                         Log.d(TAG, "jIndex: " + jIndex);
                     ArrayList<ComponentName> itemsInThisPage = new ArrayList<ComponentName>();
                     JSONArray pageItemArray = rawJsonData.getJSONArray(jIndex);
-                    final int times = (Integer)pageItemArray.get(1);// XXX not
-                                                                    // sure
-                                                                    // whether
-                                                                    // useful
                     pageItemArray = new JSONArray(pageItemArray.get(0).toString());
 
                     if (DEBUG)

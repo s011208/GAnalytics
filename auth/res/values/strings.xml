@@ -17,6 +17,6 @@
 <resources>
 
     <string name="app_name">GAnalytics</string>
-    <string name="question_info_text">"You r going to ..."</string>
+    <string name="question_info_text">"U r going to ..."</string>
     
 </resources>

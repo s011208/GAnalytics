@@ -38,7 +38,7 @@ public class LoginView extends View {
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
         mInternalVa = ValueAnimator.ofFloat(1, 4);
-        mInternalVa.setDuration(5000);
+        mInternalVa.setDuration(4000);
         mInternalVa.setRepeatCount(ValueAnimator.INFINITE);
         mInternalVa.setRepeatMode(ValueAnimator.REVERSE);
         mInternalVa.addUpdateListener(new AnimatorUpdateListener() {

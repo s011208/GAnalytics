@@ -97,11 +97,11 @@ public class PackageMatcher extends SQLiteOpenHelper {
         return title;
     }
 
-    public void setTitle(TextView tv, int count, String pkg) {
+    public void setTitle(TextView tv, int count, String pkg, int position) {
         String title = getTitle(pkg);
         if (title == null) {
             tv.setText(pkg + ", " + count);
-            new TitleParser(tv, count, pkg, mContext)
+            new TitleParser(tv, count, pkg, mContext, position)
                     .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         } else {
             tv.setText(title + ", " + count);
@@ -117,11 +117,14 @@ public class PackageMatcher extends SQLiteOpenHelper {
 
         private WeakReference<Context> mContext;
 
-        public TitleParser(TextView tv, int count, String pkg, Context context) {
+        private int mPosition;
+
+        public TitleParser(TextView tv, int count, String pkg, Context context, int position) {
             mPkg = pkg;
             mCount = count;
             mTxt = tv;
             mContext = new WeakReference<Context>(context);
+            mPosition = position;
         }
 
         @Override
@@ -149,7 +152,8 @@ public class PackageMatcher extends SQLiteOpenHelper {
                 if (context != null) {
                     getInstance(context).addTitle(mPkg, params);
                 }
-                mTxt.setText(params + ", " + mCount);
+                if (mPosition == (Integer)mTxt.getTag())
+                    mTxt.setText(params + ", " + mCount);
             } else {
                 Log.w(TAG, "title is null");
             }
