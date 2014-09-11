@@ -37,7 +37,7 @@ public class LoginActivity extends Activity {
     private String mUserAccount;
 
     // queryString
-    private static final String ALLAPPS_FOLDER_INFO = "https://www.googleapis.com/analytics/v3/data/ga?ids=ga%3A90623064&dimensions=ga%3AeventLabel&metrics=ga%3Ausers&filters=ga%3AeventAction%3D%3Dfolders%20raw%20data&start-date=2014-04-01&end-date=2014-09-10&max-results=500";
+    private static final String WORKSPACE_GROUPING_INFO = "https://www.googleapis.com/analytics/v3/data/ga?ids=ga%3A90502076&dimensions=ga%3AeventLabel&metrics=ga%3Ausers&filters=ga%3AeventAction%3D%3Dgrouping%20info&start-date=2014-07-01&end-date=2014-09-11&max-results=500";
 
     private TextView mInfoText;
 
@@ -54,7 +54,7 @@ public class LoginActivity extends Activity {
         if (extras != null && extras.containsKey(EXTRA_ACCOUNTNAME)) {
             mUserAccount = extras.getString(EXTRA_ACCOUNTNAME);
             updateCurrentInformation("login account: " + mUserAccount);
-            getTask(this, mUserAccount, GA_SCOPE, ALLAPPS_FOLDER_INFO);
+            getTask(this, mUserAccount, GA_SCOPE, WORKSPACE_GROUPING_INFO);
         } else {
             getUsername();
         }
@@ -84,7 +84,7 @@ public class LoginActivity extends Activity {
         }
         if (resultCode == RESULT_OK) {
             Log.i(TAG, "Retrying");
-            getTask(this, mUserAccount, GA_SCOPE, ALLAPPS_FOLDER_INFO).execute();
+            getTask(this, mUserAccount, GA_SCOPE, WORKSPACE_GROUPING_INFO).execute();
             return;
         }
         if (resultCode == RESULT_CANCELED) {
@@ -119,7 +119,7 @@ public class LoginActivity extends Activity {
         } else {
             if (isDeviceOnline()) {
                 updateCurrentInformation("login account: " + mUserAccount);
-                getTask(this, mUserAccount, GA_SCOPE, ALLAPPS_FOLDER_INFO).execute();
+                getTask(this, mUserAccount, GA_SCOPE, WORKSPACE_GROUPING_INFO).execute();
             } else {
                 updateCurrentInformation("please connect to Internet");
                 Toast.makeText(this, "No network connection available", Toast.LENGTH_SHORT).show();
@@ -127,7 +127,7 @@ public class LoginActivity extends Activity {
         }
     }
 
-    public void updateCurrentInformation(final String info){
+    public void updateCurrentInformation(final String info) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -135,17 +135,22 @@ public class LoginActivity extends Activity {
             }
         });
     }
-    
+
     private GetGanalyticsDataTask getTask(LoginActivity activity, String userAccount, String scope,
             String queryString) {
         return new GetGanalyticsDataTask(activity, userAccount, scope, queryString);
     }
 
+    public void startResultActivity(String rawJsonData){
+        Intent intent = new Intent(this, ResultActivity.class);
+        intent.putExtra("RAWDATA", rawJsonData);
+        this.startActivity(intent);
+    }
+    
     public void show(final String message) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(getBaseContext(), message, Toast.LENGTH_LONG).show();
                 if (DEBUG)
                     Log.d(TAG, message);
             }

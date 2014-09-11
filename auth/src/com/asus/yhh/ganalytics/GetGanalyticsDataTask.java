@@ -44,10 +44,10 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
     protected String mQueryString;
 
     GetGanalyticsDataTask(LoginActivity activity, String email, String scope, String queryString) {
-        this.mActivity = activity;
-        this.mScope = scope;
-        this.mUserAccount = email;
-        this.mQueryString = queryString;
+        mActivity = activity;
+        mScope = scope;
+        mUserAccount = email;
+        mQueryString = queryString;
         mActivity.updateCurrentInformation("Start loading process");
     }
 
@@ -97,8 +97,9 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
         int sc = con.getResponseCode();
         if (sc == 200) {
             InputStream is = con.getInputStream();
-            String name = getFirstName(readResponse(is));
-            mActivity.show(name);
+            String rawJsonData = getRawJsonData(readResponse(is));
+            mActivity.show(rawJsonData);
+            mActivity.startResultActivity(rawJsonData);
             is.close();
             return;
         } else if (sc == 401) {
@@ -122,8 +123,8 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
         return new String(bos.toByteArray(), "UTF-8");
     }
 
-    private String getFirstName(String jsonResponse) throws JSONException {
-        JSONObject profile = new JSONObject(jsonResponse);
-        return profile.getString("rows").toString();
+    private String getRawJsonData(String jsonResponse) throws JSONException {
+        JSONObject raw = new JSONObject(jsonResponse);
+        return raw.getString("rows").toString();
     }
 }
