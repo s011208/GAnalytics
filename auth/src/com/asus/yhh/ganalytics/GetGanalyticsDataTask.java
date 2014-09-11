@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package com.google.android.gms.auth.sample.helloauth;
+package com.asus.yhh.ganalytics;
 
+import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
+import com.google.android.gms.auth.UserRecoverableAuthException;
 
 import android.os.AsyncTask;
 import android.util.Log;
@@ -30,25 +32,23 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-/**
- * Display personalized greeting. This class contains boilerplate code to
- * consume the token but isn't integral to getting the tokens.
- */
-public abstract class AbstractGetNameTask extends AsyncTask<Void, Void, Void> {
-    private static final String TAG = "TokenInfoTask";
+public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
+    private static final String TAG = "QQQQ";
 
-    private static final String NAME_KEY = "given_name";
-
-    protected HelloActivity mActivity;
+    protected LoginActivity mActivity;
 
     protected String mScope;
 
-    protected String mEmail;
+    protected String mUserAccount;
 
-    AbstractGetNameTask(HelloActivity activity, String email, String scope) {
+    protected String mQueryString;
+
+    GetGanalyticsDataTask(LoginActivity activity, String email, String scope, String queryString) {
         this.mActivity = activity;
         this.mScope = scope;
-        this.mEmail = email;
+        this.mUserAccount = email;
+        this.mQueryString = queryString;
+        mActivity.updateCurrentInformation("Start loading process");
     }
 
     @Override
@@ -63,37 +63,36 @@ public abstract class AbstractGetNameTask extends AsyncTask<Void, Void, Void> {
         return null;
     }
 
+    @Override
+    protected void onPostExecute(Void result) {
+        mActivity.updateCurrentInformation("loading done");
+    }
+
     protected void onError(String msg, Exception e) {
         if (e != null) {
             Log.e(TAG, "Exception: ", e);
         }
-        mActivity.show(msg); // will be run in UI thread
+        mActivity.show(msg);
     }
 
-    /**
-     * Get a authentication token if one is not available. If the error is not
-     * recoverable then it displays the error message on parent activity.
-     */
-    protected abstract String fetchToken() throws IOException;
+    protected String fetchToken() throws IOException {
+        try {
+            return GoogleAuthUtil.getToken(mActivity, mUserAccount, mScope);
+        } catch (UserRecoverableAuthException userRecoverableException) {
+            mActivity.handleException(userRecoverableException);
+        } catch (GoogleAuthException fatalException) {
+            onError("Unrecoverable error " + fatalException.getMessage(), fatalException);
+        }
+        return null;
+    }
 
-    /**
-     * Contacts the user info server to get the profile of the user and extracts
-     * the first name of the user from the profile. In order to authenticate
-     * with the user info server the method first fetches an access token from
-     * Google Play services.
-     * 
-     * @throws IOException if communication with user info server failed.
-     * @throws JSONException if the response from the server could not be
-     *             parsed.
-     */
     private void fetchNameFromProfileServer() throws IOException, JSONException {
         String token = fetchToken();
         if (token == null) {
             // error has already been handled in fetchToken()
             return;
         }
-        final String dataUrl = "https://www.googleapis.com/analytics/v3/data/ga?ids=ga%3A90623064&dimensions=ga%3AeventLabel&metrics=ga%3Ausers&filters=ga%3AeventAction%3D%3Dfolders%20raw%20data&start-date=2014-04-01&end-date=2014-09-10&max-results=500";
-        URL url = new URL(dataUrl + "&access_token=" + token);
+        URL url = new URL(mQueryString + "&access_token=" + token);
         HttpURLConnection con = (HttpURLConnection)url.openConnection();
         int sc = con.getResponseCode();
         if (sc == 200) {
@@ -113,9 +112,6 @@ public abstract class AbstractGetNameTask extends AsyncTask<Void, Void, Void> {
         }
     }
 
-    /**
-     * Reads the response from the input stream and returns it as a string.
-     */
     private static String readResponse(InputStream is) throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         byte[] data = new byte[2048];
@@ -126,15 +122,8 @@ public abstract class AbstractGetNameTask extends AsyncTask<Void, Void, Void> {
         return new String(bos.toByteArray(), "UTF-8");
     }
 
-    /**
-     * Parses the response and returns the first name of the user.
-     * 
-     * @throws JSONException if the response is not JSON or if first name does
-     *             not exist in response
-     */
     private String getFirstName(String jsonResponse) throws JSONException {
         JSONObject profile = new JSONObject(jsonResponse);
         return profile.getString("rows").toString();
-        // return profile.getString(NAME_KEY);
     }
 }
