@@ -33,7 +33,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
-    private static final String TAG = "QQQQ";
+    private static final String TAG = "GetGanalyticsDataTask";
+
+    private static final boolean DEBUG = false;
 
     protected LoginActivity mActivity;
 
@@ -43,11 +45,16 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
 
     protected String mQueryString;
 
-    GetGanalyticsDataTask(LoginActivity activity, String email, String scope, String queryString) {
+    private int mDataType;
+
+    GetGanalyticsDataTask(LoginActivity activity, String email, int dataType) {
         mActivity = activity;
-        mScope = scope;
         mUserAccount = email;
-        mQueryString = queryString;
+        if (mDataType == LoginActivity.DATA_TYPE_WORKSPACE_GROUPING_INFO) {
+            mScope = LoginActivity.GA_SCOPE;
+            mQueryString = LoginActivity.WORKSPACE_GROUPING_INFO;
+        }
+        mDataType = dataType;
         mActivity.updateCurrentInformation("Start loading process");
     }
 
@@ -70,7 +77,8 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
 
     protected void onError(String msg, Exception e) {
         if (e != null) {
-            Log.e(TAG, "Exception: ", e);
+            if (DEBUG)
+                Log.e(TAG, "Exception: ", e);
         }
         mActivity.show(msg);
     }
@@ -99,13 +107,15 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
             InputStream is = con.getInputStream();
             String rawJsonData = getRawJsonData(readResponse(is));
             mActivity.show(rawJsonData);
-            mActivity.startResultActivity(rawJsonData);
+            if (mDataType == LoginActivity.DATA_TYPE_WORKSPACE_GROUPING_INFO)
+                mActivity.startWorkspaceGroupingInfoActivity(rawJsonData);
             is.close();
             return;
         } else if (sc == 401) {
             GoogleAuthUtil.invalidateToken(mActivity, token);
             onError("Server auth error, please try again.", null);
-            Log.i(TAG, "Server auth error: " + readResponse(con.getErrorStream()));
+            if (DEBUG)
+                Log.i(TAG, "Server auth error: " + readResponse(con.getErrorStream()));
             return;
         } else {
             onError("Server returned the following error code: " + sc, null);

@@ -1,5 +1,5 @@
 
-package com.asus.yhh.ganalytics;
+package com.asus.yhh.ganalytics.workspace.grouping.info;
 
 import java.util.HashMap;
 
@@ -34,11 +34,11 @@ public class ParsedData {
     }
 
     public void addData(ComponentName com) {
-        Integer times = relatedData.get(com);
-        if (times == null) {
+        Integer counts = relatedData.get(com);
+        if (counts == null) {
             relatedData.put(com, 1);
         } else {
-            relatedData.put(com, times + 1);
+            relatedData.put(com, counts + 1);
         }
     }
 }

@@ -45,7 +45,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.asus.yhh.ganalytics.ResultActivity" >
+        <activity android:name="com.asus.yhh.ganalytics.workspace.grouping.info.ResultActivity" >
         </activity>
     </application>
 

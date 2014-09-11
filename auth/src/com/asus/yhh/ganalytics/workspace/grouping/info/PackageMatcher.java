@@ -1,5 +1,5 @@
 
-package com.asus.yhh.ganalytics;
+package com.asus.yhh.ganalytics.workspace.grouping.info;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;

@@ -1,8 +1,6 @@
 
-package com.asus.yhh.ganalytics;
+package com.asus.yhh.ganalytics.workspace.grouping.info;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -21,10 +19,8 @@ import org.achartengine.renderer.SimpleSeriesRenderer;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
+
+import com.asus.yhh.ganalytics.R;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -43,7 +39,6 @@ import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.BaseAdapter;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -52,9 +47,9 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ViewSwitcher;
 
 public class ResultActivity extends Activity {
-    private static final String TAG = "QQQQ";
+    private static final String TAG = "ResultActivity";
 
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     private static final float PIE_CHART_IGNORE_THRESHOLD = 0.03f;
 
@@ -97,6 +92,7 @@ public class ResultActivity extends Activity {
         super.onRestoreInstanceState(savedState);
         mSeries = (CategorySeries)savedState.getSerializable("current_series");
         mRenderer = (DefaultRenderer)savedState.getSerializable("current_renderer");
+        mRawJsonData = (String)savedState.getString("raw_data");
     }
 
     @Override
@@ -104,6 +100,7 @@ public class ResultActivity extends Activity {
         super.onSaveInstanceState(outState);
         outState.putSerializable("current_series", mSeries);
         outState.putSerializable("current_renderer", mRenderer);
+        outState.putString("raw_data", mRawJsonData);
     }
 
     private void clearChart() {
@@ -511,7 +508,12 @@ public class ResultActivity extends Activity {
                         Log.d(TAG, "jIndex: " + jIndex);
                     ArrayList<ComponentName> itemsInThisPage = new ArrayList<ComponentName>();
                     JSONArray pageItemArray = rawJsonData.getJSONArray(jIndex);
+                    final int times = (Integer)pageItemArray.get(1);// XXX not
+                                                                    // sure
+                                                                    // whether
+                                                                    // useful
                     pageItemArray = new JSONArray(pageItemArray.get(0).toString());
+
                     if (DEBUG)
                         Log.i(TAG, "jArray: " + pageItemArray.toString());
                     boolean isShortCut = true;

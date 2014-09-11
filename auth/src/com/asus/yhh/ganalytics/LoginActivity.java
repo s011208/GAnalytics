@@ -1,6 +1,7 @@
 
 package com.asus.yhh.ganalytics;
 
+import com.asus.yhh.ganalytics.workspace.grouping.info.ResultActivity;
 import com.google.android.gms.auth.GooglePlayServicesAvailabilityException;
 import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.android.gms.common.AccountPicker;
@@ -16,45 +17,82 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 public class LoginActivity extends Activity {
     private static final boolean DEBUG = true;
 
-    private static final String TAG = "QQQQ";
+    private static final String TAG = "LoginActivity";
 
-    private static final String GA_SCOPE = "oauth2:https://www.googleapis.com/auth/analytics.readonly";
+    public static final String GA_SCOPE = "oauth2:https://www.googleapis.com/auth/analytics.readonly";
 
     public static final String EXTRA_ACCOUNTNAME = "extra_accountname";
 
-    static final int REQUEST_CODE_PICK_ACCOUNT = 1000;
+    private static final int REQUEST_CODE_PICK_ACCOUNT = 1000;
 
-    static final int REQUEST_CODE_RECOVER_FROM_AUTH_ERROR = 1001;
+    private static final int REQUEST_CODE_RECOVER_FROM_AUTH_ERROR = 1001;
 
-    static final int REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR = 1002;
+    private static final int REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR = 1002;
+
+    // queryString
+    public static final String WORKSPACE_GROUPING_INFO = "https://www.googleapis.com/analytics/v3/data/ga?ids=ga%3A90502076&dimensions=ga%3AeventLabel&metrics=ga%3Ausers&filters=ga%3AeventAction%3D%3Dgrouping%20info&start-date=2014-07-01&end-date=2014-09-11&max-results=1000";
+
+    public static final int DATA_TYPE_WORKSPACE_GROUPING_INFO = 0;
+
+    private TextView mInfoText;
+
+    private ListView mDataTypeList;
 
     private String mUserAccount;
 
-    // queryString
-    private static final String WORKSPACE_GROUPING_INFO = "https://www.googleapis.com/analytics/v3/data/ga?ids=ga%3A90502076&dimensions=ga%3AeventLabel&metrics=ga%3Ausers&filters=ga%3AeventAction%3D%3Dgrouping%20info&start-date=2014-07-01&end-date=2014-09-11&max-results=500";
-
-    private TextView mInfoText;
+    private int mDataType = DATA_TYPE_WORKSPACE_GROUPING_INFO;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login_activity);
-        mInfoText = (TextView)findViewById(R.id.info_txt);
-        login();
+        initComponents();
     }
 
-    private void login() {
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
+
+    private void initComponents() {
+        mInfoText = (TextView)findViewById(R.id.info_txt);
+        mDataTypeList = (ListView)findViewById(R.id.data_type_list);
+        String[] item = new String[] {
+            "Workspace grouping info"
+        };
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_expandable_list_item_1, item);
+        mDataTypeList.setAdapter(adapter);
+        mDataTypeList.setOnItemClickListener(new OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+                if (arg2 == 0) {
+                    retrieveData(DATA_TYPE_WORKSPACE_GROUPING_INFO);
+                    mDataTypeList.setEnabled(false);
+                }
+            }
+        });
+    }
+
+    private void retrieveData(int type) {
+        mDataType = type;
         Bundle extras = getIntent().getExtras();
         if (extras != null && extras.containsKey(EXTRA_ACCOUNTNAME)) {
             mUserAccount = extras.getString(EXTRA_ACCOUNTNAME);
             updateCurrentInformation("login account: " + mUserAccount);
-            getTask(this, mUserAccount, GA_SCOPE, WORKSPACE_GROUPING_INFO);
+            getTask(this, mUserAccount, mDataType);
         } else {
             getUsername();
         }
@@ -80,18 +118,22 @@ public class LoginActivity extends Activity {
     private void handleAuthorizeResult(int resultCode, Intent data) {
         if (data == null) {
             show("Unknown error, click the button again");
+            mDataTypeList.setEnabled(true);
             return;
         }
         if (resultCode == RESULT_OK) {
-            Log.i(TAG, "Retrying");
-            getTask(this, mUserAccount, GA_SCOPE, WORKSPACE_GROUPING_INFO).execute();
+            if (DEBUG)
+                Log.i(TAG, "Retrying");
+            getTask(this, mUserAccount, mDataType).execute();
             return;
         }
         if (resultCode == RESULT_CANCELED) {
             show("User rejected authorization.");
+            mDataTypeList.setEnabled(true);
             return;
         }
         show("Unknown error, click the button again");
+        mDataTypeList.setEnabled(true);
     }
 
     private void pickUserAccount() {
@@ -109,6 +151,7 @@ public class LoginActivity extends Activity {
         if (networkInfo != null && networkInfo.isConnected()) {
             return true;
         }
+        mDataTypeList.setEnabled(true);
         return false;
     }
 
@@ -119,7 +162,7 @@ public class LoginActivity extends Activity {
         } else {
             if (isDeviceOnline()) {
                 updateCurrentInformation("login account: " + mUserAccount);
-                getTask(this, mUserAccount, GA_SCOPE, WORKSPACE_GROUPING_INFO).execute();
+                getTask(this, mUserAccount, mDataType).execute();
             } else {
                 updateCurrentInformation("please connect to Internet");
                 Toast.makeText(this, "No network connection available", Toast.LENGTH_SHORT).show();
@@ -136,17 +179,27 @@ public class LoginActivity extends Activity {
         });
     }
 
-    private GetGanalyticsDataTask getTask(LoginActivity activity, String userAccount, String scope,
-            String queryString) {
-        return new GetGanalyticsDataTask(activity, userAccount, scope, queryString);
+    private GetGanalyticsDataTask getTask(LoginActivity activity, String userAccount, int dataType) {
+        return new GetGanalyticsDataTask(activity, userAccount, dataType);
     }
 
-    public void startResultActivity(String rawJsonData){
-        Intent intent = new Intent(this, ResultActivity.class);
-        intent.putExtra("RAWDATA", rawJsonData);
-        this.startActivity(intent);
+    public void startWorkspaceGroupingInfoActivity(final String rawJsonData) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mDataTypeList.setEnabled(true);
+                if (rawJsonData == null || rawJsonData.length() == 0) {
+                    updateCurrentInformation("parse data failed");
+                    return;
+                }
+                Intent intent = new Intent(LoginActivity.this, ResultActivity.class);
+                intent.putExtra("RAWDATA", rawJsonData);
+                LoginActivity.this.startActivity(intent);
+            }
+        });
+
     }
-    
+
     public void show(final String message) {
         runOnUiThread(new Runnable() {
             @Override
