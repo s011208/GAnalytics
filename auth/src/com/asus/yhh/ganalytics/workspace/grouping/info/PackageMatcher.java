@@ -3,6 +3,7 @@ package com.asus.yhh.ganalytics.workspace.grouping.info;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.util.HashMap;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -33,6 +34,8 @@ public class PackageMatcher extends SQLiteOpenHelper {
     private Context mContext;
 
     private static PackageMatcher sInstance;
+
+    private HashMap<String, String> mCachedTitle = new HashMap<String, String>();
 
     public synchronized static PackageMatcher getInstance(Context context) {
         if (sInstance == null) {
@@ -66,20 +69,39 @@ public class PackageMatcher extends SQLiteOpenHelper {
         getDatabase().execSQL(
                 "CREATE TABLE IF NOT EXISTS " + "pkg_matcher" + " ( " + "package"
                         + " TEXT PRIMARY KEY, " + "title " + " TEXT)");
+        Cursor allData = getDatabase().query("pkg_matcher", null, null, null, null, null, null,
+                null);
+        if (allData != null) {
+            try {
+                int indexPkg = allData.getColumnIndex("package");
+                int indexTitle = allData.getColumnIndex("title");
+                while (allData.moveToNext()) {
+                    mCachedTitle.put(allData.getString(indexPkg), allData.getString(indexTitle));
+                }
+            } finally {
+                allData.close();
+            }
+        }
     }
 
     private void addTitle(String pkg, String title) {
-        ContentValues cv = new ContentValues();
-        cv.put("package", pkg);
-        cv.put("title", title);
-        getDatabase().insert("pkg_matcher", null, cv);
+        if (mCachedTitle.get(pkg) == null) {
+            mCachedTitle.put(pkg, title);
+            ContentValues cv = new ContentValues();
+            cv.put("package", pkg);
+            cv.put("title", title);
+            getDatabase().insert("pkg_matcher", null, cv);
+        }
     }
 
     public String getTitle(String pkg) {
+        String title = null;
+        title = mCachedTitle.get(pkg);
+        if (title != null)
+            return title;
+
         Cursor titleCursor = getDatabase().rawQuery(
                 "select title from pkg_matcher where package='" + pkg + "'", null);
-
-        String title = null;
         if (titleCursor != null) {
             try {
                 if (titleCursor.getCount() > 0) {
@@ -102,7 +124,7 @@ public class PackageMatcher extends SQLiteOpenHelper {
         if (title == null) {
             tv.setText(pkg + ", " + count);
             new TitleParser(tv, count, pkg, mContext, position)
-                    .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    .executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
         } else {
             tv.setText(title + ", " + count);
         }
@@ -141,17 +163,16 @@ public class PackageMatcher extends SQLiteOpenHelper {
             } catch (IOException e) {
                 Log.w(TAG, "failed", e);
             }
+            Context context = mContext.get();
+            if (context != null) {
+                getInstance(context).addTitle(mPkg, title);
+            }
             return title;
         }
 
         @Override
         protected void onPostExecute(String params) {
             if (params != null) {
-                Log.i(TAG, params + ", " + mCount);
-                Context context = mContext.get();
-                if (context != null) {
-                    getInstance(context).addTitle(mPkg, params);
-                }
                 if (mPosition == (Integer)mTxt.getTag())
                     mTxt.setText(params + ", " + mCount);
             } else {

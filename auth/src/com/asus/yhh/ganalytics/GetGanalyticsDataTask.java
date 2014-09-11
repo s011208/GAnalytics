@@ -61,7 +61,7 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
     @Override
     protected Void doInBackground(Void... params) {
         try {
-            fetchNameFromProfileServer();
+            retrieveDataFromServer();
         } catch (IOException ex) {
             onError("Following Error occured, please try again. " + ex.getMessage(), ex);
         } catch (JSONException e) {
@@ -94,7 +94,7 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
         return null;
     }
 
-    private void fetchNameFromProfileServer() throws IOException, JSONException {
+    private void retrieveDataFromServer() throws IOException, JSONException {
         String token = fetchToken();
         if (token == null) {
             // error has already been handled in fetchToken()

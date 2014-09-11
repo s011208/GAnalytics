@@ -30,8 +30,6 @@ public class LoginActivity extends Activity {
 
     private static final String TAG = "LoginActivity";
 
-    public static final String GA_SCOPE = "oauth2:https://www.googleapis.com/auth/analytics.readonly";
-
     public static final String EXTRA_ACCOUNTNAME = "extra_accountname";
 
     private static final int REQUEST_CODE_PICK_ACCOUNT = 1000;
@@ -40,7 +38,10 @@ public class LoginActivity extends Activity {
 
     private static final int REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR = 1002;
 
-    // queryString
+    // GA
+    public static final String GA_SCOPE = "oauth2:https://www.googleapis.com/auth/analytics.readonly";
+
+    // Workspace grouping info
     public static final String WORKSPACE_GROUPING_INFO = "https://www.googleapis.com/analytics/v3/data/ga?ids=ga%3A90502076&dimensions=ga%3AeventLabel&metrics=ga%3Ausers&filters=ga%3AeventAction%3D%3Dgrouping%20info&start-date=2014-07-01&end-date=2014-09-11&max-results=1000";
 
     public static final int DATA_TYPE_WORKSPACE_GROUPING_INFO = 0;
@@ -48,6 +49,8 @@ public class LoginActivity extends Activity {
     private TextView mInfoText;
 
     private ListView mDataTypeList;
+
+    private LoadingView mLoadingView;
 
     private String mUserAccount;
 
@@ -84,10 +87,12 @@ public class LoginActivity extends Activity {
                 }
             }
         });
+        mLoadingView = (LoadingView)findViewById(R.id.loading_view);
     }
 
     private void retrieveData(int type) {
         mDataType = type;
+        mLoadingView.startLoading();
         Bundle extras = getIntent().getExtras();
         if (extras != null && extras.containsKey(EXTRA_ACCOUNTNAME)) {
             mUserAccount = extras.getString(EXTRA_ACCOUNTNAME);
@@ -106,6 +111,8 @@ public class LoginActivity extends Activity {
                 getUsername();
             } else if (resultCode == RESULT_CANCELED) {
                 Toast.makeText(this, "You must pick an account", Toast.LENGTH_SHORT).show();
+                mLoadingView.finishLoading();
+                mDataTypeList.setEnabled(true);
             }
         } else if ((requestCode == REQUEST_CODE_RECOVER_FROM_AUTH_ERROR || requestCode == REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR)
                 && resultCode == RESULT_OK) {
@@ -119,6 +126,7 @@ public class LoginActivity extends Activity {
         if (data == null) {
             show("Unknown error, click the button again");
             mDataTypeList.setEnabled(true);
+            mLoadingView.finishLoading();
             return;
         }
         if (resultCode == RESULT_OK) {
@@ -130,10 +138,12 @@ public class LoginActivity extends Activity {
         if (resultCode == RESULT_CANCELED) {
             show("User rejected authorization.");
             mDataTypeList.setEnabled(true);
+            mLoadingView.finishLoading();
             return;
         }
         show("Unknown error, click the button again");
         mDataTypeList.setEnabled(true);
+        mLoadingView.finishLoading();
     }
 
     private void pickUserAccount() {
@@ -166,6 +176,7 @@ public class LoginActivity extends Activity {
                 updateCurrentInformation("please connect to Internet");
                 Toast.makeText(this, "No network connection available", Toast.LENGTH_SHORT).show();
                 mDataTypeList.setEnabled(true);
+                mLoadingView.finishLoading();
             }
         }
     }
@@ -188,6 +199,7 @@ public class LoginActivity extends Activity {
             @Override
             public void run() {
                 mDataTypeList.setEnabled(true);
+                mLoadingView.finishLoading();
                 if (rawJsonData == null || rawJsonData.length() == 0) {
                     updateCurrentInformation("parse data failed");
                     return;
