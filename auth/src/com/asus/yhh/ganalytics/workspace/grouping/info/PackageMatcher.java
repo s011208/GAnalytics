@@ -129,7 +129,7 @@ public class PackageMatcher extends SQLiteOpenHelper {
         if (title == null || TitleParser.NONE_DATE.equals(title)) {
             tv.setText(pkg + ", " + count);
             new TitleParser(tv, count, pkg, mContext, position)
-                    .executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
+                    .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         } else {
             tv.setText(title + ", " + count);
         }

@@ -6,15 +6,13 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
-
-import com.asus.yhh.ganalytics.BaseCallbackDialogFragment;
 import com.asus.yhh.ganalytics.GetGanalyticsDataTask;
 import com.asus.yhh.ganalytics.R;
 import com.asus.yhh.ganalytics.login.LoginActivity;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -29,12 +27,12 @@ import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 /**
  * @author Yen-Hsun_Huang
  */
-public class DataGeneratorDialog extends BaseCallbackDialogFragment {
+public class DataGeneratorDialog extends DialogFragment implements
+        GetGanalyticsDataTask.GetGanalyticsDataTaskCallback {
     private static final boolean DEBUG = true;
 
     private static final String TAG = "QQQQ";
@@ -149,7 +147,7 @@ public class DataGeneratorDialog extends BaseCallbackDialogFragment {
                     mGaProperties.setEnabled(false);
                     mGaDuration.setEnabled(false);
                 } catch (Exception e) {
-                    Log.w(TAG, "failed", e);
+                    showMessage("failed", e);
                 }
             }
 
@@ -180,9 +178,6 @@ public class DataGeneratorDialog extends BaseCallbackDialogFragment {
             public void run() {
                 mGaProperties.setAdapter(gaProperties);
                 mGaPropertiesPb.setVisibility(View.GONE);
-                mGetReport.setEnabled(true);
-                mGaDuration.setEnabled(true);
-                mGaProperties.setEnabled(true);
             }
         });
     }
@@ -237,8 +232,8 @@ public class DataGeneratorDialog extends BaseCallbackDialogFragment {
             startDate = String.valueOf(year) + "-"
                     + (month < 10 ? "0" + String.valueOf(month) : String.valueOf(month)) + "-"
                     + (day < 10 ? "0" + String.valueOf(day) : String.valueOf(day));
-            Log.d(TAG, "end date: " + endDate + ", start date: " + startDate);
-            Log.i(TAG, "project id: " + projectId);
+            showMessage("end date: " + endDate + ", start date: " + startDate);
+            showMessage("project id: " + projectId);
             String url = "https://www.googleapis.com/analytics/v3/data/ga?ids=ga%3A" + projectId
                     + "&dimensions=ga%3AeventLabel&metrics=ga%3Ausers"
                     + "&filters=ga%3AeventAction%3D%3Dgrouping%20info&max-results=10000"
@@ -248,28 +243,16 @@ public class DataGeneratorDialog extends BaseCallbackDialogFragment {
         }
     }
 
-    @Override
-    public void onError(String msg, Exception e) {
-        show(msg);
-        mGaPropertiesPb.setVisibility(View.GONE);
-        mGetReport.setEnabled(false);
-        Toast.makeText(mContext, "unKnown error", Toast.LENGTH_LONG).show();
-    }
-
     public void startWorkspaceGroupingInfoActivity(final String rawJsonData) {
-        Log.e(TAG, "startWorkspaceGroupingInfoActivity, (getActivity() == null): "
+        showMessage("startWorkspaceGroupingInfoActivity, (getActivity() == null): "
                 + (getActivity() == null));
         if (getActivity() == null)
             return;
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mGetReport.setEnabled(true);
-                mGaProperties.setEnabled(true);
-                mGaDuration.setEnabled(true);
-                mGaId.setEnabled(true);
                 if (rawJsonData == null || rawJsonData.length() == 0) {
-                    Toast.makeText(mContext, "parse data failed", Toast.LENGTH_LONG).show();
+                    showMessage("parse data failed");
                     return;
                 }
                 if (getActivity() != null) {
@@ -280,5 +263,47 @@ public class DataGeneratorDialog extends BaseCallbackDialogFragment {
                 mContext.startActivity(intent);
             }
         });
+    }
+
+    @Override
+    public void onRetrievingData() {
+        showMessage("onRetrievingData");
+        mGetReport.setEnabled(false);
+        mGaProperties.setEnabled(false);
+        mGaDuration.setEnabled(false);
+        mGaId.setEnabled(false);
+    }
+
+    @Override
+    public void onFinishRetrievingData() {
+        mGetReport.setEnabled(mGaProperties.getAdapter() != null);
+        mGaProperties.setEnabled(true);
+        mGaDuration.setEnabled(true);
+        mGaId.setEnabled(true);
+        showMessage("onFinishRetrievingData");
+    }
+
+    @Override
+    public void showMessage(String message, boolean handlable, Exception e) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void showMessage(String message) {
+        if (DEBUG)
+            Log.d(TAG, message);
+        ((LoginActivity)getActivity()).showMessage(message);
+    }
+
+    @Override
+    public void showMessage(String message, Exception e) {
+        if (DEBUG)
+            Log.w(TAG, message, e);
+        ((LoginActivity)getActivity()).showMessage(message, e);
+    }
+
+    @Override
+    public void showDataGeneratorDialog(String rawData) {
+        throw new UnsupportedOperationException();
     }
 }

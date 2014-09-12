@@ -25,6 +25,26 @@ import java.util.ArrayList;
  * @author Yen-Hsun_Huang
  */
 public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
+    public interface GetGanalyticsDataTaskCallback {
+        public void onRetrievingData();
+
+        public void onFinishRetrievingData();
+
+        public void showMessage(String message, boolean handlable, Exception e);
+
+        public void showMessage(String message);
+
+        public void showMessage(String message, Exception e);
+
+        public void showDataGeneratorDialog(final String rawData);
+
+        public void fillUpAccountProperties(final String rawData);
+
+        public void setProjectId(final String rawData);
+
+        public void startWorkspaceGroupingInfoActivity(final String rawJsonData);
+    }
+
     private static final String TAG = "GetGanalyticsDataTask";
 
     private static final boolean DEBUG = false;
@@ -60,31 +80,21 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
 
     private int mDataType;
 
-    private WeakReference<ActivityDataTaskCallback> mActivityCallback = null;
-
-    private WeakReference<DialogDataTaskCallback> mDialogCallback = null;
+    private WeakReference<GetGanalyticsDataTaskCallback> mCallback = null;
 
     private WeakReference<Context> mContext = null;
 
-    public GetGanalyticsDataTask(Context context, ActivityDataTaskCallback activityCallback,
+    public GetGanalyticsDataTask(Context context, GetGanalyticsDataTaskCallback callback,
             String email, int dataType) {
-        this(context, activityCallback, null, email, dataType, null);
+        this(context, callback, email, dataType, null);
     }
 
-    public GetGanalyticsDataTask(Context context, DialogDataTaskCallback dialogCallback,
+    public GetGanalyticsDataTask(Context context, GetGanalyticsDataTaskCallback callback,
             String email, int dataType, String customizedQueryString) {
-        this(context, null, dialogCallback, email, dataType, customizedQueryString);
-    }
-
-    public GetGanalyticsDataTask(Context context, ActivityDataTaskCallback activityCallback,
-            DialogDataTaskCallback dialogCallback, String email, int dataType,
-            String customizedQueryString) {
         mContext = new WeakReference<Context>(context);
-        if (activityCallback != null) {
-            mActivityCallback = new WeakReference<ActivityDataTaskCallback>(activityCallback);
-        }
-        if (dialogCallback != null) {
-            mDialogCallback = new WeakReference<DialogDataTaskCallback>(dialogCallback);
+        if (callback != null) {
+            mCallback = new WeakReference<GetGanalyticsDataTaskCallback>(callback);
+            mCallback.get().onRetrievingData();
         }
         mUserAccount = email;
         mDataType = dataType;
@@ -109,8 +119,9 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
         if (customizedQueryString != null) {
             mQueryString = customizedQueryString;
         }
-        if (mActivityCallback != null && mActivityCallback.get() != null)
-            mActivityCallback.get().updateCurrentInformation("Start loading process");
+        if (mCallback != null && mCallback.get() != null) {
+            mCallback.get().showMessage("Start loading process, type: " + mDataType);
+        }
         Log.d(TAG, "GetGanalyticsDataTask data type: " + mDataType);
     }
 
@@ -119,27 +130,24 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
         try {
             retrieveDataFromServer();
         } catch (IOException ex) {
-            onError("Following Error occured, please try again. " + ex.getMessage(), ex);
+            if (mCallback != null && mCallback.get() != null) {
+                mCallback.get().showMessage(
+                        "Following Error occured, please try again. " + ex.getMessage(), ex);
+            }
         } catch (JSONException e) {
-            onError("Bad response: " + e.getMessage(), e);
+            if (mCallback != null && mCallback.get() != null) {
+                mCallback.get().showMessage("Bad response: " + e.getMessage(), e);
+            }
         }
         return null;
     }
 
     @Override
     protected void onPostExecute(Void result) {
-        if (mActivityCallback != null && mActivityCallback.get() != null)
-            mActivityCallback.get().updateCurrentInformation("loading done");
-    }
-
-    protected void onError(String msg, Exception e) {
-        if (e != null) {
-            Log.w(TAG, "Exception: ", e);
+        if (mCallback != null && mCallback.get() != null) {
+            mCallback.get().showMessage("loading done, type: " + mDataType);
+            mCallback.get().onFinishRetrievingData();
         }
-        if (mActivityCallback != null && mActivityCallback.get() != null)
-            mActivityCallback.get().onError(msg, null);
-        if (mDialogCallback != null && mDialogCallback.get() != null)
-            mDialogCallback.get().onError(msg, null);
     }
 
     protected String fetchToken() throws IOException {
@@ -148,10 +156,14 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
                 return GoogleAuthUtil.getToken(mContext.get(), mUserAccount, mScope);
             }
         } catch (UserRecoverableAuthException userRecoverableException) {
-            if (mActivityCallback != null && mActivityCallback.get() != null)
-                mActivityCallback.get().handleException(userRecoverableException);
+            if (mCallback != null && mCallback.get() != null) {
+                mCallback.get().showMessage("handlable exception", true, userRecoverableException);
+            }
         } catch (GoogleAuthException fatalException) {
-            onError("Unrecoverable error " + fatalException.getMessage(), fatalException);
+            if (mCallback != null && mCallback.get() != null) {
+                mCallback.get().showMessage("Unrecoverable error " + fatalException.getMessage(),
+                        fatalException);
+            }
         }
         return null;
     }
@@ -172,32 +184,27 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
         if (sc == 200) {
             InputStream is = con.getInputStream();
             final String rawData = readResponse(is);
-            if (mActivityCallback != null && mActivityCallback.get() != null) {
-                mActivityCallback.get().show(rawData);
-            }
-            if (mDialogCallback != null && mDialogCallback.get() != null) {
-                mDialogCallback.get().show(rawData);
-            }
+            Log.d(TAG, rawData);
             switch (mDataType) {
                 case DATA_TYPE_WORKSPACE_GROUPING_INFO:
                     String rawJsonData = getWorkspaceGroupingInfo(rawData);
-                    if (mDialogCallback != null && mDialogCallback.get() != null) {
-                        mDialogCallback.get().startWorkspaceGroupingInfoActivity(rawJsonData);
+                    if (mCallback != null && mCallback.get() != null) {
+                        mCallback.get().startWorkspaceGroupingInfoActivity(rawJsonData);
                     }
                     break;
                 case DATA_TYPE_GA_GET_ALL_IDS:
-                    if (mActivityCallback != null && mActivityCallback.get() != null) {
-                        mActivityCallback.get().showDataGeneratorDialog(rawData);
+                    if (mCallback != null && mCallback.get() != null) {
+                        mCallback.get().showDataGeneratorDialog(rawData);
                     }
                     break;
                 case DATA_TYPE_GA_GET_IDS_PROPERTIES:
-                    if (mDialogCallback != null && mDialogCallback.get() != null) {
-                        mDialogCallback.get().fillUpAccountProperties(rawData);
+                    if (mCallback != null && mCallback.get() != null) {
+                        mCallback.get().fillUpAccountProperties(rawData);
                     }
                     break;
                 case DATA_TYPE_GA_GET_PROJECT_ID:
-                    if (mDialogCallback != null && mDialogCallback.get() != null) {
-                        mDialogCallback.get().setProjectId(rawData);
+                    if (mCallback != null && mCallback.get() != null) {
+                        mCallback.get().setProjectId(rawData);
                     }
                     break;
             }
@@ -206,12 +213,16 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
         } else if (sc == 401) {
             if (mContext.get() != null)
                 GoogleAuthUtil.invalidateToken(mContext.get(), token);
-            onError("Server auth error, please try again.", null);
-            if (DEBUG)
-                Log.i(TAG, "Server auth error: " + readResponse(con.getErrorStream()));
+            if (mCallback != null && mCallback.get() != null) {
+                mCallback.get().showMessage("Server auth error, please try again.");
+                mCallback.get().showMessage(
+                        "Server auth error: " + readResponse(con.getErrorStream()));
+            }
             return;
         } else {
-            onError("Server returned the following error code: " + sc, null);
+            if (mCallback != null && mCallback.get() != null) {
+                mCallback.get().showMessage("Server returned the following error code: " + sc);
+            }
             return;
         }
     }

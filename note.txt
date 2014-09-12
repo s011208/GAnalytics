@@ -1,0 +1,2 @@
+C:\Program Files\Java\jre6\bin>keytool -exportcert -alias androiddebugkey -keystore C:\Users\Yen-Hsun_Huang\.android\debug.keystore -v -list
+ 
