@@ -1,6 +1,12 @@
 
-package com.asus.yhh.ganalytics;
+package com.asus.yhh.ganalytics.login;
 
+import com.asus.yhh.ganalytics.BaseCallbackActivity;
+import com.asus.yhh.ganalytics.GetGanalyticsDataTask;
+import com.asus.yhh.ganalytics.R;
+import com.asus.yhh.ganalytics.R.id;
+import com.asus.yhh.ganalytics.R.layout;
+import com.asus.yhh.ganalytics.workspace.grouping.info.DataGeneratorDialog;
 import com.asus.yhh.ganalytics.workspace.grouping.info.ResultActivity;
 import com.google.android.gms.auth.GooglePlayServicesAvailabilityException;
 import com.google.android.gms.auth.UserRecoverableAuthException;
@@ -10,6 +16,7 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -25,11 +32,15 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class LoginActivity extends Activity {
+/**
+ * @author Yen-Hsun_Huang
+ */
+public class LoginActivity extends BaseCallbackActivity {
     private static final boolean DEBUG = true;
 
     private static final String TAG = "LoginActivity";
 
+    // token
     public static final String EXTRA_ACCOUNTNAME = "extra_accountname";
 
     private static final int REQUEST_CODE_PICK_ACCOUNT = 1000;
@@ -38,23 +49,19 @@ public class LoginActivity extends Activity {
 
     private static final int REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR = 1002;
 
-    // GA
-    public static final String GA_SCOPE = "oauth2:https://www.googleapis.com/auth/analytics.readonly";
+    private String mUserAccount;
 
-    // Workspace grouping info
-    public static final String WORKSPACE_GROUPING_INFO = "https://www.googleapis.com/analytics/v3/data/ga?ids=ga%3A90502076&dimensions=ga%3AeventLabel&metrics=ga%3Ausers&filters=ga%3AeventAction%3D%3Dgrouping%20info&start-date=2014-07-01&end-date=2014-09-11&max-results=1000";
+    // dialog tag
+    public static final String DATA_GENERATOR_DIALOG_TAG = "DataGeneratorDialog";
 
-    public static final int DATA_TYPE_WORKSPACE_GROUPING_INFO = 0;
-
+    // components
     private TextView mInfoText;
 
     private ListView mDataTypeList;
 
     private LoadingView mLoadingView;
 
-    private String mUserAccount;
-
-    private int mDataType = DATA_TYPE_WORKSPACE_GROUPING_INFO;
+    private int mDataType = GetGanalyticsDataTask.DATA_TYPE_WORKSPACE_GROUPING_INFO;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,9 +88,9 @@ public class LoginActivity extends Activity {
 
             @Override
             public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+                mDataTypeList.setEnabled(false);
                 if (arg2 == 0) {
-                    retrieveData(DATA_TYPE_WORKSPACE_GROUPING_INFO);
-                    mDataTypeList.setEnabled(false);
+                    retrieveData(GetGanalyticsDataTask.DATA_TYPE_GA_GET_ALL_IDS);
                 }
             }
         });
@@ -92,12 +99,13 @@ public class LoginActivity extends Activity {
 
     private void retrieveData(int type) {
         mDataType = type;
+        Log.d(TAG, "retrieveData type: " + type);
         mLoadingView.startLoading();
         Bundle extras = getIntent().getExtras();
         if (extras != null && extras.containsKey(EXTRA_ACCOUNTNAME)) {
             mUserAccount = extras.getString(EXTRA_ACCOUNTNAME);
             updateCurrentInformation("login account: " + mUserAccount);
-            getTask(this, mUserAccount, mDataType);
+            new GetGanalyticsDataTask(this, this, mUserAccount, mDataType).execute();
         } else {
             getUsername();
         }
@@ -132,7 +140,7 @@ public class LoginActivity extends Activity {
         if (resultCode == RESULT_OK) {
             if (DEBUG)
                 Log.i(TAG, "Retrying");
-            getTask(this, mUserAccount, mDataType).execute();
+            new GetGanalyticsDataTask(this, this, mUserAccount, mDataType).execute();
             return;
         }
         if (resultCode == RESULT_CANCELED) {
@@ -171,7 +179,7 @@ public class LoginActivity extends Activity {
         } else {
             if (isDeviceOnline()) {
                 updateCurrentInformation("login account: " + mUserAccount);
-                getTask(this, mUserAccount, mDataType).execute();
+                new GetGanalyticsDataTask(this, this, mUserAccount, mDataType).execute();
             } else {
                 updateCurrentInformation("please connect to Internet");
                 Toast.makeText(this, "No network connection available", Toast.LENGTH_SHORT).show();
@@ -190,34 +198,15 @@ public class LoginActivity extends Activity {
         });
     }
 
-    private GetGanalyticsDataTask getTask(LoginActivity activity, String userAccount, int dataType) {
-        return new GetGanalyticsDataTask(activity, userAccount, dataType);
-    }
-
-    public void startWorkspaceGroupingInfoActivity(final String rawJsonData) {
+    public void showDataGeneratorDialog(final String rawData) {
+        DataGeneratorDialog dialog = DataGeneratorDialog.getNewInstance(rawData);
+        dialog.show(getFragmentManager(), DATA_GENERATOR_DIALOG_TAG);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 mDataTypeList.setEnabled(true);
                 mLoadingView.finishLoading();
-                if (rawJsonData == null || rawJsonData.length() == 0) {
-                    updateCurrentInformation("parse data failed");
-                    return;
-                }
-                Intent intent = new Intent(LoginActivity.this, ResultActivity.class);
-                intent.putExtra("RAWDATA", rawJsonData);
-                LoginActivity.this.startActivity(intent);
-            }
-        });
-
-    }
-
-    public void show(final String message) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (DEBUG)
-                    Log.d(TAG, message);
+                updateCurrentInformation(getString(R.string.question_info_text));
             }
         });
     }
@@ -238,5 +227,21 @@ public class LoginActivity extends Activity {
                 }
             }
         });
+    }
+
+    @Override
+    public void onError(String msg, Exception e) {
+        show(msg);
+        mDataTypeList.setEnabled(true);
+        mLoadingView.finishLoading();
+        updateCurrentInformation("unKnown error");
+    }
+
+    public void startLoading() {
+        mLoadingView.startLoading();
+    }
+
+    public void finishLoading() {
+        mLoadingView.finishLoading();
     }
 }

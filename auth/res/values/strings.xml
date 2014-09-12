@@ -11,12 +11,13 @@
   distributed under the License is distributed on an "AS IS" BASIS,
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
-  limitations under the License.
-  -->
+  limitations under the License.
+-->
 
 <resources>
 
     <string name="app_name">GAnalytics</string>
     <string name="question_info_text">"U r going to ..."</string>
-    
+    <string name="workspace_grouping_info_dialog_title">Workspace grouping info</string>
+
 </resources>

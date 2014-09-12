@@ -20,8 +20,12 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.util.Log;
+import android.util.LruCache;
 import android.widget.TextView;
 
+/**
+ * @author Yen-Hsun_Huang
+ */
 public class PackageMatcher extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
 
@@ -63,7 +67,7 @@ public class PackageMatcher extends SQLiteOpenHelper {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         mContext = context.getApplicationContext();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            getDatabase().execSQL("PRAGMA synchronous = 1");
+            getDatabase().execSQL("PRAGMA synchronous = 0");
             setWriteAheadLoggingEnabled(true);
         }
         getDatabase().execSQL(
@@ -86,6 +90,7 @@ public class PackageMatcher extends SQLiteOpenHelper {
 
     private void addTitle(String pkg, String title) {
         if (mCachedTitle.get(pkg) == null) {
+            Log.w("QQQQ", "pkg: " + pkg + ", title: " + title);
             mCachedTitle.put(pkg, title);
             ContentValues cv = new ContentValues();
             cv.put("package", pkg);
@@ -121,7 +126,7 @@ public class PackageMatcher extends SQLiteOpenHelper {
 
     public void setTitle(TextView tv, int count, String pkg, int position) {
         String title = getTitle(pkg);
-        if (title == null) {
+        if (title == null || TitleParser.NONE_DATE.equals(title)) {
             tv.setText(pkg + ", " + count);
             new TitleParser(tv, count, pkg, mContext, position)
                     .executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
@@ -131,6 +136,8 @@ public class PackageMatcher extends SQLiteOpenHelper {
     }
 
     public static class TitleParser extends AsyncTask<Void, Void, String> {
+        public static final String NONE_DATE = "nd";
+
         private String mPkg;
 
         private int mCount;
@@ -140,6 +147,8 @@ public class PackageMatcher extends SQLiteOpenHelper {
         private WeakReference<Context> mContext;
 
         private int mPosition;
+
+        private final HashMap<String, String> mLoadedItemMap = new HashMap<String, String>();
 
         public TitleParser(TextView tv, int count, String pkg, Context context, int position) {
             mPkg = pkg;
@@ -152,6 +161,14 @@ public class PackageMatcher extends SQLiteOpenHelper {
         @Override
         protected String doInBackground(Void... params) {
             Log.d(TAG, "doInBackground: " + mPkg);
+            synchronized (mLoadedItemMap) {
+                // avoid re-loading
+                if (mLoadedItemMap.get(mPkg) == null) {
+                    mLoadedItemMap.put(mPkg, NONE_DATE);
+                } else {
+                    return NONE_DATE;
+                }
+            }
             Document doc;
             String title = null;
             try {
@@ -160,12 +177,12 @@ public class PackageMatcher extends SQLiteOpenHelper {
                 for (Element ele : eles) {
                     title = ele.text();
                 }
+                Context context = mContext.get();
+                if (context != null) {
+                    getInstance(context).addTitle(mPkg, title);
+                }
             } catch (IOException e) {
                 Log.w(TAG, "failed", e);
-            }
-            Context context = mContext.get();
-            if (context != null) {
-                getInstance(context).addTitle(mPkg, title);
             }
             return title;
         }
@@ -173,8 +190,13 @@ public class PackageMatcher extends SQLiteOpenHelper {
         @Override
         protected void onPostExecute(String params) {
             if (params != null) {
-                if (mPosition == (Integer)mTxt.getTag())
-                    mTxt.setText(params + ", " + mCount);
+                if (mPosition == (Integer)mTxt.getTag()) {
+                    if (NONE_DATE.equals(params)) {
+                        // do nothing
+                    } else {
+                        mTxt.setText(params + ", " + mCount);
+                    }
+                }
             } else {
                 Log.w(TAG, "title is null");
             }

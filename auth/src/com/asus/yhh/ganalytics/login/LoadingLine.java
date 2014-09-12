@@ -1,20 +1,30 @@
 
-package com.asus.yhh.ganalytics;
+package com.asus.yhh.ganalytics.login;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
+/**
+ * @author Yen-Hsun_Huang
+ */
 public class LoadingLine {
 
-    public static final int LOADING_WORM_CHANGE_DISTANCE = 20;
+    public int LOADING_WORM_CHANGE_DISTANCE = 4;
 
-    public static final int LOADING_WORM_LENGTH = 300;
+    public int LOADING_WORM_LENGTH = 300;
 
-    public static final int LOADING_WORM_WIDTH = 20;
+    public static final int LOADING_WORM_WIDTH = 2;
 
     public int mWay = 0;
 
-    public int mLoadingLineX = -1 - LOADING_WORM_LENGTH, mLoadingLineY = -1 - LOADING_WORM_LENGTH;
+    public int mLoadingLineX, mLoadingLineY;
+
+    public LoadingLine(float density) {
+        LOADING_WORM_CHANGE_DISTANCE *= density;
+        LOADING_WORM_LENGTH = (int)((((Math.random() * 1000) % 150) + 150) * density);
+        mLoadingLineX = -1 - LOADING_WORM_LENGTH;
+        mLoadingLineY = -1 - LOADING_WORM_LENGTH;
+    }
 
     public void calculate(final int width, final int height, final Canvas canvas, final Paint paint) {
         if (mLoadingLineX + LOADING_WORM_LENGTH <= -1 || mLoadingLineY + LOADING_WORM_LENGTH <= -1

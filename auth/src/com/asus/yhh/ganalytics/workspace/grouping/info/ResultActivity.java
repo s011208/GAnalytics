@@ -50,6 +50,9 @@ import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ViewSwitcher;
 
+/**
+ * @author Yen-Hsun_Huang
+ */
 public class ResultActivity extends Activity {
     private static final String TAG = "ResultActivity";
 

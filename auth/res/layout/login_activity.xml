@@ -3,11 +3,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <com.asus.yhh.ganalytics.LoadingView
+    <com.asus.yhh.ganalytics.login.LoadingView
         android:id="@+id/loading_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent" >
-    </com.asus.yhh.ganalytics.LoadingView>
+    </com.asus.yhh.ganalytics.login.LoadingView>
 
     <View
         android:id="@+id/center_v"

@@ -20,7 +20,7 @@
     android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="19"
+        android:minSdkVersion="18"
         android:targetSdkVersion="19" />
 
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
@@ -37,7 +37,7 @@
             android:value="@integer/google_play_services_version" />
 
         <activity
-            android:name="com.asus.yhh.ganalytics.LoginActivity"
+            android:name="com.asus.yhh.ganalytics.login.LoginActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

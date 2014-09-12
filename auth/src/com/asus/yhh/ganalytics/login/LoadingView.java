@@ -1,5 +1,5 @@
 
-package com.asus.yhh.ganalytics;
+package com.asus.yhh.ganalytics.login;
 
 import java.util.ArrayList;
 
@@ -16,7 +16,7 @@ import android.util.Log;
 import android.view.View;
 
 /**
- * @author yenhsunhuang
+ * @author Yen-Hsun_Huang
  */
 public class LoadingView extends View {
     private float mCoefficient = 0;
@@ -31,7 +31,7 @@ public class LoadingView extends View {
 
     private final ArrayList<LoadingLine> mLoadingLines = new ArrayList<LoadingLine>();
 
-    private static final int NUMBER_OF_LOADING_WORMS = 5;
+    private static final int NUMBER_OF_LOADING_WORMS = 50;
 
     public LoadingView(Context context) {
         this(context, null);
@@ -47,9 +47,10 @@ public class LoadingView extends View {
         mAnimatedPaint.setAntiAlias(true);
         mRandomLinesPaint.setDither(true);
         mRandomLinesPaint.setAntiAlias(true);
-        mRandomLinesPaint.setStrokeWidth(LoadingLine.LOADING_WORM_WIDTH);
+        float density = context.getResources().getDisplayMetrics().scaledDensity;
+        mRandomLinesPaint.setStrokeWidth(LoadingLine.LOADING_WORM_WIDTH * density);
         for (int i = 0; i < NUMBER_OF_LOADING_WORMS; i++) {
-            mLoadingLines.add(new LoadingLine());
+            mLoadingLines.add(new LoadingLine(density));
         }
     }
 
@@ -77,8 +78,8 @@ public class LoadingView extends View {
             }
         });
         mInternalVa.start();
-        LinearGradient lg = new LinearGradient(0, 0, 100, 100, Color.RED, Color.GREEN,
-                android.graphics.Shader.TileMode.MIRROR);
+        LinearGradient lg = new LinearGradient(0, 0, 100, 100, Color.BLACK, Color.argb(30, 255,
+                255, 255), android.graphics.Shader.TileMode.MIRROR);
         mRandomLinesPaint.setShader(lg);
     }
 

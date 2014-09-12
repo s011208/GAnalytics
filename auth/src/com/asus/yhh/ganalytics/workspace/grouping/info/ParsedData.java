@@ -5,6 +5,9 @@ import java.util.HashMap;
 
 import android.content.ComponentName;
 
+/**
+ * @author Yen-Hsun_Huang
+ */
 public class ParsedData {
     public static final int TYPE_SHORTCUT = 0;
 
