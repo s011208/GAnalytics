@@ -187,7 +187,8 @@ public class ExceptionsWidgetConfigurationActivity extends FetchTokenActivity {
             String url = "https://www.googleapis.com/analytics/v3/data/ga?ids=ga%3A"
                     + projectId
                     + "&dimensions=ga%3AexceptionDescription%2Cga%3AoperatingSystemVersion&metrics=ga%3Aexceptions"
-                    + "&start-date=" + startDate + "&end-date=" + endDate + "&max-results=10000";
+                    + "&sort=-ga%3Aexceptions" + "&start-date=" + startDate + "&end-date="
+                    + endDate + "&max-results=10000";
             getSharedPreferences(SHPREF_KEY, Context.MODE_PRIVATE).edit()
                     .putString(String.valueOf(mAppWidgetId), url).commit();
             getSharedPreferences(SHPREF_KEY, Context.MODE_PRIVATE).edit()
