@@ -10,6 +10,7 @@ import com.asus.yhh.ganalytics.GetGanalyticsDataTask;
 import com.asus.yhh.ganalytics.R;
 import com.asus.yhh.ganalytics.login.LoginActivity;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -244,8 +245,7 @@ public class DataGeneratorDialog extends DialogFragment implements
     }
 
     public void startWorkspaceGroupingInfoActivity(final String rawJsonData) {
-        showMessage("startWorkspaceGroupingInfoActivity, (getActivity() == null): "
-                + (getActivity() == null));
+        showMessage("startWorkspaceGroupingInfoActivity");
         if (getActivity() == null)
             return;
         getActivity().runOnUiThread(new Runnable() {
@@ -292,14 +292,20 @@ public class DataGeneratorDialog extends DialogFragment implements
     public void showMessage(String message) {
         if (DEBUG)
             Log.d(TAG, message);
-        ((LoginActivity)getActivity()).showMessage(message);
+        Activity activity = getActivity();
+        if (activity != null) {
+            ((LoginActivity)activity).showMessage(message);
+        }
     }
 
     @Override
     public void showMessage(String message, Exception e) {
         if (DEBUG)
             Log.w(TAG, message, e);
-        ((LoginActivity)getActivity()).showMessage(message, e);
+        Activity activity = getActivity();
+        if (activity != null) {
+            ((LoginActivity)activity).showMessage(message, e);
+        }
     }
 
     @Override
