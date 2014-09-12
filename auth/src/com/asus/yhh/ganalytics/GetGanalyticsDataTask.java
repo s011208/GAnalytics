@@ -43,6 +43,8 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
         public void setProjectId(final String rawData);
 
         public void startWorkspaceGroupingInfoActivity(final String rawJsonData);
+        
+        public void getExceptionsReport(final String rawData);
     }
 
     private static final String TAG = "GetGanalyticsDataTask";
@@ -71,6 +73,12 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
     public static final String GA_GET_PROJECT_ID_URL = "https://www.googleapis.com/analytics/v3/management/accounts/accountId/webproperties/webPropertyId";
 
     public static final int DATA_TYPE_GA_GET_PROJECT_ID = 3;
+
+    // ga exceptions report
+
+    public static final String GA_EXCEPTIONS_REPORT = WORKSPACE_GROUPING_INFO_URL;// whatever
+
+    public static final int DATA_TYPE_GA_EXCEPTIONS_REPORT = 4;
 
     protected String mScope;
 
@@ -112,6 +120,10 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
                 mQueryString = GA_GET_IDS_PROPERTIES_URL;
                 break;
             case DATA_TYPE_GA_GET_PROJECT_ID:
+                mScope = GA_SCOPE;
+                mQueryString = GA_GET_PROJECT_ID_URL;
+                break;
+            case DATA_TYPE_GA_EXCEPTIONS_REPORT:
                 mScope = GA_SCOPE;
                 mQueryString = GA_GET_PROJECT_ID_URL;
                 break;
@@ -205,6 +217,11 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
                 case DATA_TYPE_GA_GET_PROJECT_ID:
                     if (mCallback != null && mCallback.get() != null) {
                         mCallback.get().setProjectId(rawData);
+                    }
+                    break;
+                case DATA_TYPE_GA_EXCEPTIONS_REPORT:
+                    if (mCallback != null && mCallback.get() != null) {
+                        mCallback.get().getExceptionsReport(rawData);
                     }
                     break;
             }

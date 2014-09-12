@@ -1,6 +1,8 @@
 
 package com.asus.yhh.ganalytics.widgets.report.exceptions;
 
+import java.util.ArrayList;
+
 import com.asus.yhh.ganalytics.R;
 
 import android.content.Context;
@@ -14,14 +16,25 @@ public class ExceptionsWidgetListService extends RemoteViewsService {
         return (new MyWidgetFactory(getApplicationContext(), intent));
     }
 
+    public static class ExceptionsReportData {
+        public String mException;
+
+        public String mVersion;
+
+        public String mCount;
+
+        public ExceptionsReportData(String e, String v, String c) {
+            mException = e;
+            mVersion = v;
+            mCount = c;
+        }
+    }
+
     public static class MyWidgetFactory implements RemoteViewsService.RemoteViewsFactory {
 
         private Context mContext;
 
-        private String[] mFoods = new String[] {
-                "Apple", "Banana", "Pear", "Handset", "People", "Bar", "Wind", "Song",
-                "Source code", "Screen", "Package", "Cup", "Computer"
-        };
+        private final ArrayList<ExceptionsReportData> mData = new ArrayList<ExceptionsReportData>();
 
         public MyWidgetFactory(Context context, Intent intent) {
             mContext = context;
@@ -29,7 +42,7 @@ public class ExceptionsWidgetListService extends RemoteViewsService {
 
         @Override
         public int getCount() {
-            return mFoods.length;
+            return mData.size();
         }
 
         @Override
@@ -49,7 +62,9 @@ public class ExceptionsWidgetListService extends RemoteViewsService {
             }
             RemoteViews views = new RemoteViews(mContext.getPackageName(),
                     R.layout.widget_exceptions_report_row);
-            views.setTextViewText(R.id.exceptions_report_list_text, mFoods[position]);
+            views.setTextViewText(R.id.exceptions_report_list_e, mData.get(position).mException);
+            views.setTextViewText(R.id.exceptions_report_list_v, mData.get(position).mVersion);
+            views.setTextViewText(R.id.exceptions_report_list_c, mData.get(position).mCount);
             return views;
         }
 

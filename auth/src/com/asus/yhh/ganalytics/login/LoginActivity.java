@@ -1,21 +1,10 @@
 
 package com.asus.yhh.ganalytics.login;
 
+import com.asus.yhh.ganalytics.FetchTokenActivity;
 import com.asus.yhh.ganalytics.GetGanalyticsDataTask;
 import com.asus.yhh.ganalytics.R;
 import com.asus.yhh.ganalytics.workspace.grouping.info.DataGeneratorDialog;
-import com.google.android.gms.auth.GooglePlayServicesAvailabilityException;
-import com.google.android.gms.auth.UserRecoverableAuthException;
-import com.google.android.gms.common.AccountPicker;
-import com.google.android.gms.common.GooglePlayServicesUtil;
-
-import android.accounts.AccountManager;
-import android.app.Activity;
-import android.app.Dialog;
-import android.content.Context;
-import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -29,22 +18,10 @@ import android.widget.TextView;
 /**
  * @author Yen-Hsun_Huang
  */
-public class LoginActivity extends Activity implements
-        GetGanalyticsDataTask.GetGanalyticsDataTaskCallback {
+public class LoginActivity extends FetchTokenActivity {
     private static final boolean DEBUG = true;
 
     private static final String TAG = "LoginActivity";
-
-    // token
-    public static final String EXTRA_ACCOUNTNAME = "extra_accountname";
-
-    private static final int REQUEST_CODE_PICK_ACCOUNT = 1000;
-
-    private static final int REQUEST_CODE_RECOVER_FROM_AUTH_ERROR = 1001;
-
-    private static final int REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR = 1002;
-
-    private String mUserAccount;
 
     // dialog tag
     public static final String DATA_GENERATOR_DIALOG_TAG = "DataGeneratorDialog";
@@ -58,18 +35,11 @@ public class LoginActivity extends Activity implements
 
     private LoadingView mLoadingView;
 
-    private int mDataType = GetGanalyticsDataTask.DATA_TYPE_WORKSPACE_GROUPING_INFO;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login_activity);
         initComponents();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
     }
 
     private void initComponents() {
@@ -93,108 +63,6 @@ public class LoginActivity extends Activity implements
         });
         mLoadingView = (LoadingView)findViewById(R.id.loading_view);
         mLogScroller = (ScrollView)findViewById(R.id.log_view_scroller);
-    }
-
-    private void retrieveData(int type) {
-        mDataType = type;
-        Bundle extras = getIntent().getExtras();
-        if (extras != null && extras.containsKey(EXTRA_ACCOUNTNAME)) {
-            mUserAccount = extras.getString(EXTRA_ACCOUNTNAME);
-            showMessage("login account: " + mUserAccount);
-            new GetGanalyticsDataTask(this, this, mUserAccount, mDataType).execute();
-        } else {
-            getUsername();
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_CODE_PICK_ACCOUNT) {
-            if (resultCode == RESULT_OK) {
-                mUserAccount = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
-                getUsername();
-            } else if (resultCode == RESULT_CANCELED) {
-                showMessage("You must pick an account");
-                onFinishRetrievingData();
-            }
-        } else if ((requestCode == REQUEST_CODE_RECOVER_FROM_AUTH_ERROR || requestCode == REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR)
-                && resultCode == RESULT_OK) {
-            handleAuthorizeResult(resultCode, data);
-            return;
-        }
-        super.onActivityResult(requestCode, resultCode, data);
-    }
-
-    private void handleAuthorizeResult(int resultCode, Intent data) {
-        if (data == null) {
-            showMessage("Unknown error, click the button again");
-            onFinishRetrievingData();
-            return;
-        }
-        if (resultCode == RESULT_OK) {
-            if (DEBUG)
-                Log.i(TAG, "Retrying");
-            new GetGanalyticsDataTask(this, this, mUserAccount, mDataType).execute();
-            return;
-        }
-        if (resultCode == RESULT_CANCELED) {
-            showMessage("User rejected authorization.");
-            onFinishRetrievingData();
-            return;
-        }
-        showMessage("Unknown error, click the button again");
-    }
-
-    private void pickUserAccount() {
-        String[] accountTypes = new String[] {
-            "com.google"
-        };
-        Intent intent = AccountPicker.newChooseAccountIntent(null, null, accountTypes, false, null,
-                null, null, null);
-        showMessage("pick a Google account");
-        startActivityForResult(intent, REQUEST_CODE_PICK_ACCOUNT);
-    }
-
-    private boolean isDeviceOnline() {
-        ConnectivityManager connMgr = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-        if (networkInfo != null && networkInfo.isConnected()) {
-            return true;
-        }
-        return false;
-    }
-
-    private void getUsername() {
-        if (mUserAccount == null) {
-            showMessage("Choose an account");
-            pickUserAccount();
-        } else {
-            if (isDeviceOnline()) {
-                showMessage("login account: " + mUserAccount);
-                new GetGanalyticsDataTask(this, this, mUserAccount, mDataType).execute();
-            } else {
-                showMessage("please connect to Internet");
-                onFinishRetrievingData();
-            }
-        }
-    }
-
-    private void handleException(final Exception e) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (e instanceof GooglePlayServicesAvailabilityException) {
-                    int statusCode = ((GooglePlayServicesAvailabilityException)e)
-                            .getConnectionStatusCode();
-                    Dialog dialog = GooglePlayServicesUtil.getErrorDialog(statusCode,
-                            LoginActivity.this, REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR);
-                    dialog.show();
-                } else if (e instanceof UserRecoverableAuthException) {
-                    Intent intent = ((UserRecoverableAuthException)e).getIntent();
-                    startActivityForResult(intent, REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR);
-                }
-            }
-        });
     }
 
     @Override
@@ -276,6 +144,11 @@ public class LoginActivity extends Activity implements
 
     @Override
     public void startWorkspaceGroupingInfoActivity(String rawJsonData) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void getExceptionsReport(String rawData) {
         throw new UnsupportedOperationException();
     }
 }

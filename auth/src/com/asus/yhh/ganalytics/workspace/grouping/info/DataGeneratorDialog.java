@@ -238,7 +238,7 @@ public class DataGeneratorDialog extends DialogFragment implements
             String url = "https://www.googleapis.com/analytics/v3/data/ga?ids=ga%3A" + projectId
                     + "&dimensions=ga%3AeventLabel&metrics=ga%3Ausers"
                     + "&filters=ga%3AeventAction%3D%3Dgrouping%20info&max-results=10000"
-                    + "&start-date=" + startDate + "&end-date=" + "2014-09-12";
+                    + "&start-date=" + startDate + "&end-date=" + endDate;
             new GetGanalyticsDataTask(mContext, DataGeneratorDialog.this, mEmail,
                     GetGanalyticsDataTask.DATA_TYPE_WORKSPACE_GROUPING_INFO, url).execute();
         }
@@ -310,6 +310,11 @@ public class DataGeneratorDialog extends DialogFragment implements
 
     @Override
     public void setGaId(String rawData) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void getExceptionsReport(String rawData) {
         throw new UnsupportedOperationException();
     }
 }
