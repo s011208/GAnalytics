@@ -197,7 +197,8 @@ public class LoginActivity extends Activity implements
         });
     }
 
-    public void showDataGeneratorDialog(final String rawData) {
+    @Override
+    public void setGaId(final String rawData) {
         DataGeneratorDialog dialog = DataGeneratorDialog.getNewInstance(rawData);
         dialog.show(getFragmentManager(), DATA_GENERATOR_DIALOG_TAG);
         runOnUiThread(new Runnable() {

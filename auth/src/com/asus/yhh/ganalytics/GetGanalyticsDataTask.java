@@ -36,7 +36,7 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
 
         public void showMessage(String message, Exception e);
 
-        public void showDataGeneratorDialog(final String rawData);
+        public void setGaId(final String rawData);
 
         public void fillUpAccountProperties(final String rawData);
 
@@ -194,7 +194,7 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
                     break;
                 case DATA_TYPE_GA_GET_ALL_IDS:
                     if (mCallback != null && mCallback.get() != null) {
-                        mCallback.get().showDataGeneratorDialog(rawData);
+                        mCallback.get().setGaId(rawData);
                     }
                     break;
                 case DATA_TYPE_GA_GET_IDS_PROPERTIES:

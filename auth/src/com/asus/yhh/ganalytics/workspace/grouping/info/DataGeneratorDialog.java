@@ -309,7 +309,7 @@ public class DataGeneratorDialog extends DialogFragment implements
     }
 
     @Override
-    public void showDataGeneratorDialog(String rawData) {
+    public void setGaId(String rawData) {
         throw new UnsupportedOperationException();
     }
 }

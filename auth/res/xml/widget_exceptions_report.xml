@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:configure="com.asus.yhh.ganalytics.widgets.report.exceptions.ExceptionsWidgetConfigurationActivity"
+    android:initialLayout="@layout/widget_exceptions_report"
+    android:minHeight="144dp"
+    android:minWidth="288dp"
+    android:resizeMode="horizontal|vertical"
+    android:updatePeriodMillis="86400000" >
+
+</appwidget-provider>
