@@ -12,6 +12,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.asus.yhh.ganalytics.R;
+import com.asus.yhh.ganalytics.widgets.WidgetDataHelper;
 
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
@@ -21,23 +22,34 @@ import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
 public class ExceptionsWidgetListService extends RemoteViewsService {
+    public static final boolean DEBUG = false;
+
+    public static final String TAG = "ExceptionsWidgetListService";
+
     @Override
     public RemoteViewsFactory onGetViewFactory(Intent intent) {
-        Log.w("QQQQ", "ExceptionsWidgetListService");
+        if (DEBUG)
+            Log.w(TAG, "ExceptionsWidgetListService");
         return (new MyWidgetFactory(getApplicationContext(), intent));
     }
 
     public static class ExceptionsReportData {
         public String mException;
 
-        public String mVersion;
+        public String mAndroidVersion;
+
+        public String mAppVersion;
 
         public String mCount;
 
-        public ExceptionsReportData(String e, String v, String c) {
+        public ExceptionsReportData(String e, String androidV, String c, String appV) {
             mException = e;
-            mVersion = v;
+            mAndroidVersion = androidV;
             mCount = c;
+            mAppVersion = appV;
+            if (DEBUG)
+                Log.d(TAG, "android version: " + mAndroidVersion + ", exception count: " + c
+                        + ", app version: " + appV);
         }
     }
 
@@ -77,7 +89,10 @@ public class ExceptionsWidgetListService extends RemoteViewsService {
             RemoteViews views = new RemoteViews(mContext.getPackageName(),
                     R.layout.widget_exceptions_report_row);
             views.setTextViewText(R.id.exceptions_report_list_e, mData.get(position).mException);
-            views.setTextViewText(R.id.exceptions_report_list_v, mData.get(position).mVersion);
+            views.setTextViewText(R.id.exceptions_report_list_android_v,
+                    mData.get(position).mAndroidVersion);
+            views.setTextViewText(R.id.exceptions_report_list_app_v,
+                    mData.get(position).mAppVersion);
             views.setTextViewText(R.id.exceptions_report_list_c, mData.get(position).mCount);
             return views;
         }
@@ -103,46 +118,35 @@ public class ExceptionsWidgetListService extends RemoteViewsService {
 
         @Override
         public void onDataSetChanged() {
-            Log.e("QQQQ", "onDataSetChanged");
-            File data = new File(mContext.getFilesDir().getAbsolutePath() + File.separator
-                    + String.valueOf(mAppWidgetId));
-            if (data.exists()) {
-                int length = (int)data.length();
-
-                byte[] bytes = new byte[length];
-
-                FileInputStream in;
+            if (DEBUG)
+                Log.i(TAG, "onDataSetChanged");
+            String[] widgetData = WidgetDataHelper.getInstance(mContext).getWidgetInfo(
+                    String.valueOf(mAppWidgetId));
+            if (widgetData == null)
+                return;
+            String contents = widgetData[4];
+            Log.d(TAG, "update time: " + widgetData[3]);
+            if (contents != null && contents.length() > 0) {
+                mData.clear();
                 try {
-                    in = new FileInputStream(data);
-                    in.read(bytes);
-                    in.close();
-                } catch (FileNotFoundException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                String contents = new String(bytes);
-                if (contents != null && contents.length() > 0) {
-                    mData.clear();
-                    try {
-                        JSONObject parent = new JSONObject(contents);
-                        JSONArray pArray = parent.getJSONArray("rows");
-                        for (int i = 0; i < pArray.length(); i++) {
-                            JSONArray jChild = pArray.getJSONArray(i);
-                            mData.add(new ExceptionsReportData(jChild.getString(0), jChild
-                                    .getString(1), jChild.getString(2)));
-                        }
-                    } catch (JSONException e) {
-                        Log.w("QQQQ", "failed", e);
+                    JSONObject parent = new JSONObject(contents);
+                    JSONArray pArray = parent.getJSONArray("rows");
+                    for (int i = 0; i < pArray.length(); i++) {
+                        JSONArray jChild = pArray.getJSONArray(i);
+                        mData.add(new ExceptionsReportData(jChild.getString(0),
+                                jChild.getString(1), jChild.getString(3), jChild.getString(2)));
                     }
+                } catch (JSONException e) {
+                    Log.w(TAG, "failed", e);
                 }
             }
         }
 
         @Override
         public void onDestroy() {
+            if (DEBUG)
+                Log.d(TAG, "onDestroy");
+            WidgetDataHelper.getInstance(mContext).removeWidget(String.valueOf(mAppWidgetId));
             mContext = null;
         }
     }

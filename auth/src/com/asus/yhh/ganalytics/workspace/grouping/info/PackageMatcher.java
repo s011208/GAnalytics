@@ -90,7 +90,6 @@ public class PackageMatcher extends SQLiteOpenHelper {
 
     private void addTitle(String pkg, String title) {
         if (mCachedTitle.get(pkg) == null) {
-            Log.w("QQQQ", "pkg: " + pkg + ", title: " + title);
             mCachedTitle.put(pkg, title);
             ContentValues cv = new ContentValues();
             cv.put("package", pkg);

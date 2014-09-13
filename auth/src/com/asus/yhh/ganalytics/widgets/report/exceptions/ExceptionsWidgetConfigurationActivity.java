@@ -12,6 +12,7 @@ import com.asus.yhh.ganalytics.GetGanalyticsDataTask;
 import com.asus.yhh.ganalytics.R;
 import com.asus.yhh.ganalytics.login.LoadingView;
 import com.asus.yhh.ganalytics.login.LoginActivity;
+import com.asus.yhh.ganalytics.widgets.WidgetDataHelper;
 import com.asus.yhh.ganalytics.workspace.grouping.info.DataGeneratorDialog;
 import com.asus.yhh.ganalytics.workspace.grouping.info.GAProjectDatabaseHelper;
 
@@ -30,9 +31,6 @@ import android.widget.TextView;
 import android.widget.AdapterView.OnItemSelectedListener;
 
 public class ExceptionsWidgetConfigurationActivity extends FetchTokenActivity {
-    public static final String SHPREF_KEY = "exceptions_widget_url";
-
-    public static final String ACCOUNT_MAIL = "_email";
 
     private LoadingView mLoadingView;
 
@@ -143,7 +141,7 @@ public class ExceptionsWidgetConfigurationActivity extends FetchTokenActivity {
         mGaDuration.setEnabled(false);
     }
 
-    public String getDate(Date date) {
+    public static String getDate(Date date) {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         return dateFormat.format(date);
     }
@@ -186,13 +184,12 @@ public class ExceptionsWidgetConfigurationActivity extends FetchTokenActivity {
             showMessage("project id: " + projectId);
             String url = "https://www.googleapis.com/analytics/v3/data/ga?ids=ga%3A"
                     + projectId
-                    + "&dimensions=ga%3AexceptionDescription%2Cga%3AoperatingSystemVersion&metrics=ga%3Aexceptions"
+                    + "&dimensions=ga%3AexceptionDescription%2Cga%3AoperatingSystemVersion%2Cga%3AappVersion&metrics=ga%3Aexceptions"
                     + "&sort=-ga%3Aexceptions" + "&start-date=" + startDate + "&end-date="
                     + endDate + "&max-results=10000";
-            getSharedPreferences(SHPREF_KEY, Context.MODE_PRIVATE).edit()
-                    .putString(String.valueOf(mAppWidgetId), url).commit();
-            getSharedPreferences(SHPREF_KEY, Context.MODE_PRIVATE).edit()
-                    .putString(String.valueOf(mAppWidgetId) + ACCOUNT_MAIL, mEmail).commit();
+            WidgetDataHelper.getInstance(getApplicationContext()).addNewWidget(
+                    String.valueOf(mAppWidgetId), mEmail, url,
+                    WidgetDataHelper.WIDGET_TYPE_EXCEPTION_REPORT);
             setResult(Activity.RESULT_OK);
             finish();
             // below for debug

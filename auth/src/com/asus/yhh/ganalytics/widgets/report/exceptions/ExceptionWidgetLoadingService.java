@@ -1,50 +1,68 @@
 
 package com.asus.yhh.ganalytics.widgets.report.exceptions;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import com.asus.yhh.ganalytics.GetGanalyticsDataTask;
+import com.asus.yhh.ganalytics.widgets.WidgetDataHelper;
 
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
-import android.content.Context;
+import android.content.ComponentName;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.util.Log;
 
 public class ExceptionWidgetLoadingService extends Service {
+    private static final String TAG = "ExceptionWidgetLoadingService";
+
+    private static final boolean DEBUG = true;
+
     private int[] mAppWidgetIds;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i("QQQQ", "onStartCommand");
+        if (DEBUG)
+            Log.d(TAG, "onStartCommand");
         if (intent != null) {
             mAppWidgetIds = intent.getIntArrayExtra("appWidgetIds");
             if (mAppWidgetIds == null) {
-                stopSelf();
+                if (DEBUG)
+                    Log.d(TAG, "onStartCommand mAppWidgetIds is null");
+                AppWidgetManager awm = AppWidgetManager.getInstance(getApplicationContext());
+                mAppWidgetIds = awm.getAppWidgetIds(new ComponentName(getApplicationContext()
+                        .getPackageName(), ExceptionsWidgetProvider.class.getName()));
+                if (mAppWidgetIds.length > 0) {
+                    retrieveData();
+                } else {
+                    stopSelf();
+                }
             } else {
                 retrieveData();
             }
         } else {
+            if (DEBUG)
+                Log.d(TAG, "onStartCommand intent is null");
             stopSelf();
         }
         return super.onStartCommand(intent, flags, startId);
     }
 
     private void retrieveData() {
-        Log.i("QQQQ", "retrieveData");
+        if (DEBUG)
+            Log.d(TAG, "retrieveData");
         final AppWidgetManager awm = AppWidgetManager.getInstance(getApplicationContext());
-        SharedPreferences pref = getSharedPreferences(
-                ExceptionsWidgetConfigurationActivity.SHPREF_KEY, Context.MODE_PRIVATE);
         for (final int id : mAppWidgetIds) {
-            String url = pref.getString(String.valueOf(id), null);
-            String email = pref.getString(String.valueOf(id)
-                    + ExceptionsWidgetConfigurationActivity.ACCOUNT_MAIL, null);
-            Log.d("QQQQ", "id: " + id + ", email: " + email + ", url: " + url);
+            String[] widgetData = WidgetDataHelper.getInstance(getApplicationContext())
+                    .getWidgetInfo(String.valueOf(id));
+            if (widgetData == null)
+                continue;
+            String email = widgetData[1];
+            String url = widgetData[2];
+            if (DEBUG)
+                Log.d(TAG, "id: " + id + ", email: " + email + ", url: " + url);
             if (email == null || url == null)
                 continue;
             new GetGanalyticsDataTask(this,
@@ -102,23 +120,9 @@ public class ExceptionWidgetLoadingService extends Service {
                         public void getExceptionsReport(final String rawData) {
                             if (rawData == null || rawData.isEmpty())
                                 return;
-                            String path = getApplicationContext().getFilesDir().getAbsolutePath();
-                            File newFile = new File(path + File.separator + String.valueOf(id));
-                            if (newFile.exists()) {
-                                newFile.delete();
-                            }
-                            FileOutputStream stream = null;
-                            try {
-                                stream = new FileOutputStream(newFile);
-                                stream.write(rawData.getBytes());
-                                stream.close();
-                            } catch (FileNotFoundException e) {
-                                // TODO Auto-generated catch block
-                                e.printStackTrace();
-                            } catch (IOException e) {
-                                // TODO Auto-generated catch block
-                                e.printStackTrace();
-                            }
+                            String updateDate = getDate(new Date());
+                            WidgetDataHelper.getInstance(getApplicationContext()).updateContent(
+                                    String.valueOf(id), updateDate, rawData, null);
                             ExceptionsWidgetProvider
                                     .performUpdate(getApplicationContext(), awm, id);
                         }
@@ -138,4 +142,8 @@ public class ExceptionWidgetLoadingService extends Service {
         return null;
     }
 
+    public static String getDate(Date date) {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return dateFormat.format(date);
+    }
 }

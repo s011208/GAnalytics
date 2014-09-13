@@ -36,7 +36,7 @@ public class DataGeneratorDialog extends DialogFragment implements
         GetGanalyticsDataTask.GetGanalyticsDataTaskCallback {
     private static final boolean DEBUG = true;
 
-    private static final String TAG = "QQQQ";
+    private static final String TAG = "DataGeneratorDialog";
 
     private static final String BUNDLE_KEY_RAW_DATA = "b_k_raw_data";
 
