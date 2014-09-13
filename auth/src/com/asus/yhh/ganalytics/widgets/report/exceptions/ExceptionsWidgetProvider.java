@@ -38,23 +38,25 @@ public class ExceptionsWidgetProvider extends AppWidgetProvider {
         views.setRemoteAdapter(R.id.exceptions_report_list, intent);
         String[] widgetInfo = WidgetDataHelper.getInstance(context).getWidgetInfo(
                 String.valueOf(appWidgetId));
-        if (widgetInfo != null && widgetInfo[3] != null) {
-            views.setTextViewText(R.id.update_time, "Last update time: " + widgetInfo[3]);
-            views.setViewVisibility(R.id.update_time, View.VISIBLE);
-        } else {
-            views.setViewVisibility(R.id.update_time, View.GONE);
-        }
-        if (widgetInfo != null && widgetInfo[6] != null) {
-            views.setTextViewText(R.id.widget_title, widgetInfo[6]);
-            views.setViewVisibility(R.id.widget_title, View.VISIBLE);
-        } else {
-            views.setViewVisibility(R.id.widget_title, View.GONE);
+        if (widgetInfo != null) {
+            if (widgetInfo[3] != null) {
+                views.setTextViewText(R.id.update_time, "Last update time: " + widgetInfo[3]);
+                views.setViewVisibility(R.id.update_time, View.VISIBLE);
+            } else {
+                views.setViewVisibility(R.id.update_time, View.GONE);
+            }
+            if (widgetInfo[6] != null) {
+                views.setTextViewText(R.id.widget_title, widgetInfo[6]);
+                views.setViewVisibility(R.id.widget_title, View.VISIBLE);
+            } else {
+                views.setTextViewText(R.id.widget_title,
+                        context.getString(R.string.widget_is_loading));
+            }
         }
         Intent clickIntent = new Intent(context.getApplicationContext(),
                 ExceptionWidgetLoadingService.class);
         PendingIntent pendingIntent = PendingIntent.getService(context, 0, clickIntent, 0);
         views.setOnClickPendingIntent(R.id.widget_title, pendingIntent);
-
         awm.notifyAppWidgetViewDataChanged(appWidgetId, R.id.exceptions_report_list);
         awm.updateAppWidget(appWidgetId, views);
 

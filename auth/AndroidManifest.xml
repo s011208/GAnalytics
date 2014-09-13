@@ -35,7 +35,9 @@
         </activity>
 
         <!-- exceptions report widget start -->
-        <receiver android:name="com.asus.yhh.ganalytics.widgets.report.exceptions.ExceptionsWidgetProvider" >
+        <receiver
+            android:name="com.asus.yhh.ganalytics.widgets.report.exceptions.ExceptionsWidgetProvider"
+            android:label="@string/exceptions_report_widget" >
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>

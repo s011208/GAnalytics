@@ -21,6 +21,7 @@ import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -134,7 +135,8 @@ public class ExceptionsWidgetConfigurationActivity extends FetchTokenActivity {
 
         mGaProperties = (Spinner)findViewById(R.id.ga_properties);
         mGaDuration = (Spinner)findViewById(R.id.ga_duration);
-        ArrayAdapter<String> gaDuration = new ArrayAdapter<String>(this,
+        ArrayAdapter<String> gaDuration = new ArrayAdapter<String>(new ContextThemeWrapper(
+                getApplicationContext(), android.R.style.Theme_DeviceDefault_Light_Dialog),
                 android.R.layout.simple_spinner_dropdown_item, DURATION_OPTIONS);
         mGaDuration.setAdapter(gaDuration);
         mGaDuration.setSelection(2);
@@ -238,8 +240,8 @@ public class ExceptionsWidgetConfigurationActivity extends FetchTokenActivity {
     @Override
     public void setGaId(final String rawData) {
         final String[] tempData = new String[2];
-        final ArrayAdapter<String> gaIdList = new ArrayAdapter<String>(
-                ExceptionsWidgetConfigurationActivity.this,
+        final ArrayAdapter<String> gaIdList = new ArrayAdapter<String>(new ContextThemeWrapper(
+                getApplicationContext(), android.R.style.Theme_DeviceDefault_Light_Dialog),
                 android.R.layout.simple_spinner_dropdown_item, GetGanalyticsDataTask.getGaId(
                         rawData, mGaIdList, tempData));
         mEmail = tempData[0];
@@ -255,7 +257,8 @@ public class ExceptionsWidgetConfigurationActivity extends FetchTokenActivity {
 
     @Override
     public void fillUpAccountProperties(String rawData) {
-        final ArrayAdapter<String> gaProperties = new ArrayAdapter<String>(this,
+        final ArrayAdapter<String> gaProperties = new ArrayAdapter<String>(new ContextThemeWrapper(
+                getApplicationContext(), android.R.style.Theme_DeviceDefault_Light_Dialog),
                 android.R.layout.simple_spinner_dropdown_item,
                 GetGanalyticsDataTask.getGaProperties(rawData, mPropertiesIdList));
         runOnUiThread(new Runnable() {
