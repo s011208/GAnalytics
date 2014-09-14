@@ -10,11 +10,12 @@ import java.util.Date;
 import com.asus.yhh.ganalytics.FetchTokenActivity;
 import com.asus.yhh.ganalytics.GetGanalyticsDataTask;
 import com.asus.yhh.ganalytics.R;
+import com.asus.yhh.ganalytics.activity.report.workspace.groupinginfo.WorkspaceGroupingInfoDialog;
 import com.asus.yhh.ganalytics.login.LoadingView;
 import com.asus.yhh.ganalytics.login.LoginActivity;
 import com.asus.yhh.ganalytics.util.GAProjectDatabaseHelper;
+import com.asus.yhh.ganalytics.util.Utils;
 import com.asus.yhh.ganalytics.widgets.WidgetDataHelper;
-import com.asus.yhh.ganalytics.workspace.grouping.info.DataGeneratorDialog;
 
 import android.app.Activity;
 import android.appwidget.AppWidgetManager;
@@ -143,16 +144,11 @@ public class ExceptionsWidgetConfigurationActivity extends FetchTokenActivity {
         mGaDuration.setEnabled(false);
     }
 
-    public static String getDate(Date date) {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        return dateFormat.format(date);
-    }
-
     public void setExceptionUrlData(String projectId) {
         if (projectId != null) {
             String startDate = null, endDate = null;
             Date current = new Date();
-            endDate = getDate(current);
+            endDate = Utils.getRoughlyDate(current);
             Calendar time = Calendar.getInstance();
             time.add(Calendar.MONTH, 1);
             int duration = mGaDuration.getSelectedItemPosition();
@@ -283,7 +279,7 @@ public class ExceptionsWidgetConfigurationActivity extends FetchTokenActivity {
     }
 
     @Override
-    public void startWorkspaceGroupingInfoActivity(String rawJsonData) {
+    public void setResultActivityData(String rawJsonData) {
         // TODO Auto-generated method stub
     }
 

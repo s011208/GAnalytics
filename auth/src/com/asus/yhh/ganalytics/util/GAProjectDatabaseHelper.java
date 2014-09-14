@@ -1,8 +1,6 @@
 
 package com.asus.yhh.ganalytics.util;
 
-import java.util.HashMap;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -83,6 +81,34 @@ public class GAProjectDatabaseHelper extends SQLiteOpenHelper {
             }
         }
         return null;
+    }
+
+    /**
+     * @param projectId
+     * @return string[0] = email, string[1] = account, string[2] = property
+     */
+    public String[] getAccountInfoFromProjectId(String projectId) {
+        if (projectId == null)
+            return null;
+        String[] rtn = null;
+        Cursor c = getDatabase().query("ga_project_table", null, "project_id='" + projectId + "'",
+                null, null, null, null);
+        if (c != null) {
+            try {
+                int emailIndex = c.getColumnIndex("email");
+                int accountIndex = c.getColumnIndex("account");
+                int propertyIndex = c.getColumnIndex("property");
+                while (c.moveToNext()) {
+                    rtn = new String[] {
+                            c.getString(emailIndex), c.getString(accountIndex),
+                            c.getString(propertyIndex)
+                    };
+                }
+            } finally {
+                c.close();
+            }
+        }
+        return rtn;
     }
 
     @Override

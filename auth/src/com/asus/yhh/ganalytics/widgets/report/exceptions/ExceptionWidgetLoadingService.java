@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import com.asus.yhh.ganalytics.GetGanalyticsDataTask;
+import com.asus.yhh.ganalytics.util.Utils;
 import com.asus.yhh.ganalytics.widgets.WidgetDataHelper;
 
 import android.app.Service;
@@ -69,7 +70,7 @@ public class ExceptionWidgetLoadingService extends Service {
                     new GetGanalyticsDataTask.GetGanalyticsDataTaskCallback() {
 
                         @Override
-                        public void startWorkspaceGroupingInfoActivity(String rawJsonData) {
+                        public void setResultActivityData(String rawJsonData) {
                             // TODO Auto-generated method stub
 
                         }
@@ -120,7 +121,7 @@ public class ExceptionWidgetLoadingService extends Service {
                         public void getExceptionsReport(final String rawData) {
                             if (rawData == null || rawData.isEmpty())
                                 return;
-                            String updateDate = getDate(new Date());
+                            String updateDate = Utils.getDetailedDate(new Date());
                             WidgetDataHelper.getInstance(getApplicationContext()).updateContent(
                                     String.valueOf(id), updateDate, rawData, null);
                             ExceptionsWidgetProvider
@@ -142,8 +143,4 @@ public class ExceptionWidgetLoadingService extends Service {
         return null;
     }
 
-    public static String getDate(Date date) {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        return dateFormat.format(date);
-    }
 }

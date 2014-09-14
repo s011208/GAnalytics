@@ -42,7 +42,7 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
 
         public void setProjectId(final String rawData);
 
-        public void startWorkspaceGroupingInfoActivity(final String rawJsonData);
+        public void setResultActivityData(final String rawJsonData);
 
         public void getExceptionsReport(final String rawData);
     }
@@ -57,18 +57,20 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
     // ga worpsace grouping info
     public static final String WORKSPACE_GROUPING_INFO_URL = "https://www.googleapis.com/analytics/v3/data/ga?ids=ga%3A90502076&dimensions=ga%3AeventLabel&metrics=ga%3Ausers&filters=ga%3AeventAction%3D%3Dgrouping%20info&start-date=2014-07-01&end-date=2014-09-11&max-results=10000";
 
-    public static final int DATA_TYPE_WORKSPACE_GROUPING_INFO = 0;
+    public static final int DATA_TYPE_ACTIVITY_DATA_WORKSPACE_GROUPING_INFO = 0;
 
     // ga id
     public static final String GA_GET_ALL_IDS_URL = "https://www.googleapis.com/analytics/v3/management/accounts";
 
     public static final int DATA_TYPE_GA_GET_ALL_IDS = 1;
-    
+
     // grouping info dialog
     public static final int DATA_TYPE_GA_GROUPING_INFO_DIALOG = 2;
 
     // exceptions report dialog
     public static final int DATA_TYPE_GA_EXCEPTIONS_REPORT_DIALOG = 3;
+
+    public static final int DATE_TYPE_ACTIVITY_DATA_APP_EXCEPTIONS_REPORT = 7;
 
     // ga properties
     public static final String GA_GET_IDS_PROPERTIES_URL = "https://www.googleapis.com/analytics/v3/management/accounts/accountId/webproperties";
@@ -113,7 +115,8 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
         mUserAccount = email;
         mDataType = dataType;
         switch (mDataType) {
-            case DATA_TYPE_WORKSPACE_GROUPING_INFO:
+            case DATA_TYPE_ACTIVITY_DATA_WORKSPACE_GROUPING_INFO:
+            case DATE_TYPE_ACTIVITY_DATA_APP_EXCEPTIONS_REPORT:
                 mScope = GA_SCOPE;
                 mQueryString = WORKSPACE_GROUPING_INFO_URL;
                 break;
@@ -206,10 +209,10 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
             if (DEBUG)
                 Log.d(TAG, rawData);
             switch (mDataType) {
-                case DATA_TYPE_WORKSPACE_GROUPING_INFO:
+                case DATA_TYPE_ACTIVITY_DATA_WORKSPACE_GROUPING_INFO:
+                case DATE_TYPE_ACTIVITY_DATA_APP_EXCEPTIONS_REPORT:
                     if (mCallback != null && mCallback.get() != null) {
-                        mCallback.get().startWorkspaceGroupingInfoActivity(
-                                getWorkspaceGroupingInfo(rawData));
+                        mCallback.get().setResultActivityData(getWorkspaceGroupingInfo(rawData));
                     }
                     break;
                 case DATA_TYPE_GA_GROUPING_INFO_DIALOG:

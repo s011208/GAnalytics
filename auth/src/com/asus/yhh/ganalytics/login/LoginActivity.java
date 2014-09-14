@@ -4,7 +4,10 @@ package com.asus.yhh.ganalytics.login;
 import com.asus.yhh.ganalytics.FetchTokenActivity;
 import com.asus.yhh.ganalytics.GetGanalyticsDataTask;
 import com.asus.yhh.ganalytics.R;
-import com.asus.yhh.ganalytics.workspace.grouping.info.DataGeneratorDialog;
+import com.asus.yhh.ganalytics.activity.report.app.exceptions.ExceptionReportDialog;
+import com.asus.yhh.ganalytics.activity.report.workspace.groupinginfo.WorkspaceGroupingInfoDialog;
+import com.asus.yhh.ganalytics.util.ProjectSelectDialog;
+
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -24,7 +27,13 @@ public class LoginActivity extends FetchTokenActivity {
     private static final String TAG = "LoginActivity";
 
     // dialog tag
-    public static final String DATA_GENERATOR_DIALOG_TAG = "DataGeneratorDialog";
+    public static final String WORKSPACE_GROUPING_INFO_DIALOG_TAG = "WorkspaceGroupingInfoDialog";
+
+    public static final String APP_EXCEPTIONS_REPORT_DIALOG_TAG = "ExceptionReportDialog";
+
+    private static final String[] MAIN_OPTIONS = new String[] {
+            "Workspace grouping info", "Exception report"
+    };
 
     // components
     private TextView mInfoText;
@@ -45,11 +54,8 @@ public class LoginActivity extends FetchTokenActivity {
     private void initComponents() {
         mInfoText = (TextView)findViewById(R.id.info_txt);
         mDataTypeList = (ListView)findViewById(R.id.data_type_list);
-        String[] item = new String[] {
-                "Workspace grouping info", "Exception report"
-        };
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_expandable_list_item_1, item);
+                android.R.layout.simple_expandable_list_item_1, MAIN_OPTIONS);
         mDataTypeList.setAdapter(adapter);
         mDataTypeList.setOnItemClickListener(new OnItemClickListener() {
 
@@ -72,10 +78,11 @@ public class LoginActivity extends FetchTokenActivity {
 
     @Override
     public void setGaId(final String rawData, int type) {
+        ProjectSelectDialog dialog;
         switch (type) {
             case GetGanalyticsDataTask.DATA_TYPE_GA_GROUPING_INFO_DIALOG:
-                DataGeneratorDialog dialog = DataGeneratorDialog.getNewInstance(rawData);
-                dialog.show(getFragmentManager(), DATA_GENERATOR_DIALOG_TAG);
+                dialog = WorkspaceGroupingInfoDialog.getNewInstance(rawData);
+                dialog.show(getFragmentManager(), WORKSPACE_GROUPING_INFO_DIALOG_TAG);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -85,6 +92,15 @@ public class LoginActivity extends FetchTokenActivity {
                 });
                 break;
             case GetGanalyticsDataTask.DATA_TYPE_GA_EXCEPTIONS_REPORT_DIALOG:
+                dialog = ExceptionReportDialog.getNewInstance(rawData);
+                dialog.show(getFragmentManager(), APP_EXCEPTIONS_REPORT_DIALOG_TAG);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        onFinishRetrievingData();
+                        showMessage(getString(R.string.question_info_text));
+                    }
+                });
                 break;
         }
     }
@@ -154,7 +170,7 @@ public class LoginActivity extends FetchTokenActivity {
     }
 
     @Override
-    public void startWorkspaceGroupingInfoActivity(String rawJsonData) {
+    public void setResultActivityData(String rawJsonData) {
         throw new UnsupportedOperationException();
     }
 

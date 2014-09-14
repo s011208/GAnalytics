@@ -43,6 +43,8 @@ public abstract class ProjectSelectDialog extends DialogFragment implements
 
     public static final String INTENT_RAW_DATA_KEY = "RAWDATA";
 
+    public static final String INTENT_PROJECT_ID = "PROJECT_ID";
+
     private Context mContext;
 
     private String mGaIdRawData;
@@ -66,6 +68,8 @@ public abstract class ProjectSelectDialog extends DialogFragment implements
     private ProgressBar mGaPropertiesPb;
 
     private TextView mGetReport;
+    
+    public String mProjectId;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -100,7 +104,7 @@ public abstract class ProjectSelectDialog extends DialogFragment implements
                 String projectId = GAProjectDatabaseHelper.getInstance(mContext).getProjectId(
                         mEmail, mGaIdList.get(mGaId.getSelectedItemPosition()), propertyId);
                 if (projectId != null) {
-                    getWorkspaceGroupingInfo(projectId);
+                    retrieveResultActivityData(projectId);
                 } else {
                     String url = GetGanalyticsDataTask.GA_GET_PROJECT_ID_URL.replace("accountId",
                             String.valueOf(gaId)).replace("webPropertyId", propertyId);
@@ -178,11 +182,6 @@ public abstract class ProjectSelectDialog extends DialogFragment implements
         });
     }
 
-    public String getDate(Date date) {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        return dateFormat.format(date);
-    }
-
     @Override
     public void setProjectId(String rawData) {
         String projectId = GetGanalyticsDataTask.getGaProjectId(rawData);
@@ -191,14 +190,14 @@ public abstract class ProjectSelectDialog extends DialogFragment implements
             GAProjectDatabaseHelper.getInstance(mContext).insertNewProject(mEmail,
                     mGaIdList.get(mGaId.getSelectedItemPosition()), propertyId, projectId);
         }
-        getWorkspaceGroupingInfo(GetGanalyticsDataTask.getGaProjectId(rawData));
+        retrieveResultActivityData(GetGanalyticsDataTask.getGaProjectId(rawData));
     }
 
-    public void getWorkspaceGroupingInfo(String projectId) {
+    private void retrieveResultActivityData(String projectId) {
         if (projectId != null) {
             String startDate = null, endDate = null;
             Date current = new Date();
-            endDate = getDate(current);
+            endDate = Utils.getRoughlyDate(current);
             Calendar time = Calendar.getInstance();
             time.add(Calendar.MONTH, 1);
             int duration = mGaDuration.getSelectedItemPosition();
@@ -230,16 +229,19 @@ public abstract class ProjectSelectDialog extends DialogFragment implements
                     + (day < 10 ? "0" + String.valueOf(day) : String.valueOf(day));
             showMessage("end date: " + endDate + ", start date: " + startDate);
             showMessage("project id: " + projectId);
-            String url = "https://www.googleapis.com/analytics/v3/data/ga?ids=ga%3A" + projectId
-                    + "&dimensions=ga%3AeventLabel&metrics=ga%3Ausers"
-                    + "&filters=ga%3AeventAction%3D%3Dgrouping%20info&max-results=10000"
-                    + "&start-date=" + startDate + "&end-date=" + endDate;
+            mProjectId = projectId;
+            String url = getResultActivityDataUrl(projectId, startDate, endDate);
             new GetGanalyticsDataTask(mContext, ProjectSelectDialog.this, mEmail,
-                    GetGanalyticsDataTask.DATA_TYPE_WORKSPACE_GROUPING_INFO, url).execute();
+                    getResultActivityDataType(), url).execute();
         }
     }
 
-    public void startWorkspaceGroupingInfoActivity(final String rawJsonData) {
+    public abstract String getResultActivityDataUrl(String projectId, String startDate,
+            String endDate);
+
+    public abstract int getResultActivityDataType();
+
+    public void setResultActivityData(final String rawJsonData) {
         showMessage("startWorkspaceGroupingInfoActivity");
         if (getActivity() == null)
             return;

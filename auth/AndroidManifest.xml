@@ -31,9 +31,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.asus.yhh.ganalytics.workspace.grouping.info.ResultActivity" >
+        <activity android:name="com.asus.yhh.ganalytics.activity.report.workspace.groupinginfo.ResultActivity" >
         </activity>
-
+        <activity android:name="com.asus.yhh.ganalytics.activity.report.app.exceptions.ExceptionReportActivity" >
+        </activity>
         <!-- exceptions report widget start -->
         <receiver
             android:name="com.asus.yhh.ganalytics.widgets.report.exceptions.ExceptionsWidgetProvider"

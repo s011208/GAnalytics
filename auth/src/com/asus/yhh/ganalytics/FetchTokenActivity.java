@@ -28,7 +28,7 @@ public abstract class FetchTokenActivity extends Activity implements
 
     public String mUserAccount;
 
-    public int mDataType = GetGanalyticsDataTask.DATA_TYPE_WORKSPACE_GROUPING_INFO;
+    public int mDataType;
 
     public void retrieveData(int type) {
         mDataType = type;
