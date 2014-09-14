@@ -36,14 +36,14 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
 
         public void showMessage(String message, Exception e);
 
-        public void setGaId(final String rawData);
+        public void setGaId(final String rawData, int type);
 
         public void fillUpAccountProperties(final String rawData);
 
         public void setProjectId(final String rawData);
 
         public void startWorkspaceGroupingInfoActivity(final String rawJsonData);
-        
+
         public void getExceptionsReport(final String rawData);
     }
 
@@ -63,22 +63,28 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
     public static final String GA_GET_ALL_IDS_URL = "https://www.googleapis.com/analytics/v3/management/accounts";
 
     public static final int DATA_TYPE_GA_GET_ALL_IDS = 1;
+    
+    // grouping info dialog
+    public static final int DATA_TYPE_GA_GROUPING_INFO_DIALOG = 2;
+
+    // exceptions report dialog
+    public static final int DATA_TYPE_GA_EXCEPTIONS_REPORT_DIALOG = 3;
 
     // ga properties
     public static final String GA_GET_IDS_PROPERTIES_URL = "https://www.googleapis.com/analytics/v3/management/accounts/accountId/webproperties";
 
-    public static final int DATA_TYPE_GA_GET_IDS_PROPERTIES = 2;
+    public static final int DATA_TYPE_GA_GET_IDS_PROPERTIES = 4;
 
     // ga project id
     public static final String GA_GET_PROJECT_ID_URL = "https://www.googleapis.com/analytics/v3/management/accounts/accountId/webproperties/webPropertyId";
 
-    public static final int DATA_TYPE_GA_GET_PROJECT_ID = 3;
+    public static final int DATA_TYPE_GA_GET_PROJECT_ID = 5;
 
     // ga exceptions report
 
     public static final String GA_EXCEPTIONS_REPORT = WORKSPACE_GROUPING_INFO_URL;// whatever
 
-    public static final int DATA_TYPE_GA_EXCEPTIONS_REPORT = 4;
+    public static final int DATA_TYPE_GA_EXCEPTIONS_REPORT = 6;
 
     protected String mScope;
 
@@ -111,7 +117,8 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
                 mScope = GA_SCOPE;
                 mQueryString = WORKSPACE_GROUPING_INFO_URL;
                 break;
-            case DATA_TYPE_GA_GET_ALL_IDS:
+            case DATA_TYPE_GA_GROUPING_INFO_DIALOG:
+            case DATA_TYPE_GA_EXCEPTIONS_REPORT_DIALOG:
                 mScope = GA_SCOPE;
                 mQueryString = GA_GET_ALL_IDS_URL;
                 break;
@@ -196,17 +203,19 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
         if (sc == 200) {
             InputStream is = con.getInputStream();
             final String rawData = readResponse(is);
-            Log.d(TAG, rawData);
+            if (DEBUG)
+                Log.d(TAG, rawData);
             switch (mDataType) {
                 case DATA_TYPE_WORKSPACE_GROUPING_INFO:
-                    String rawJsonData = getWorkspaceGroupingInfo(rawData);
                     if (mCallback != null && mCallback.get() != null) {
-                        mCallback.get().startWorkspaceGroupingInfoActivity(rawJsonData);
+                        mCallback.get().startWorkspaceGroupingInfoActivity(
+                                getWorkspaceGroupingInfo(rawData));
                     }
                     break;
-                case DATA_TYPE_GA_GET_ALL_IDS:
+                case DATA_TYPE_GA_GROUPING_INFO_DIALOG:
+                case DATA_TYPE_GA_EXCEPTIONS_REPORT_DIALOG:
                     if (mCallback != null && mCallback.get() != null) {
-                        mCallback.get().setGaId(rawData);
+                        mCallback.get().setGaId(rawData, mDataType);
                     }
                     break;
                 case DATA_TYPE_GA_GET_IDS_PROPERTIES:

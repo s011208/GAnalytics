@@ -99,7 +99,7 @@ public class ExceptionWidgetLoadingService extends Service {
                         }
 
                         @Override
-                        public void setGaId(String rawData) {
+                        public void setGaId(String rawData, int type) {
                             // TODO Auto-generated method stub
 
                         }

@@ -3,6 +3,9 @@
     <string name="app_name">GAnalytics</string>
     <string name="question_info_text">"U r going to ..."</string>
     <string name="workspace_grouping_info_dialog_title">Workspace grouping info</string>
-	<string name="exceptions_report_widget">Exceptions report</string>
-	<string name="widget_is_loading">Widget is loading</string>
+    <string name="exceptions_report_widget">Exceptions report</string>
+    <string name="widget_is_loading">Widget is loading</string>
+    <string name="widget_set_result_ok">Set widget</string>
+    <string name="show_report">Show report</string>
+
 </resources>

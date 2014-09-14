@@ -1,5 +1,5 @@
 
-package com.asus.yhh.ganalytics.workspace.grouping.info;
+package com.asus.yhh.ganalytics.util;
 
 import java.util.HashMap;
 
@@ -21,8 +21,6 @@ public class GAProjectDatabaseHelper extends SQLiteOpenHelper {
     private static final String TAG = "PackageMatcher";
 
     private SQLiteDatabase mDb;
-
-    private Context mContext;
 
     private static GAProjectDatabaseHelper sInstance;
 
@@ -50,7 +48,6 @@ public class GAProjectDatabaseHelper extends SQLiteOpenHelper {
 
     private GAProjectDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
-        mContext = context.getApplicationContext();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             getDatabase().execSQL("PRAGMA synchronous = 0");
             setWriteAheadLoggingEnabled(true);

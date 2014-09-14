@@ -70,12 +70,12 @@
                 android:id="@+id/get_report"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="30sp"
                 android:gravity="center"
                 android:paddingBottom="20dp"
                 android:paddingTop="20dp"
+                android:text="@string/widget_set_result_ok"
                 android:textColor="#000"
-                android:text="OKKKKKKKKKK" />
+                android:textSize="30sp" />
         </LinearLayout>
     </LinearLayout>
 

@@ -46,7 +46,7 @@ public class LoginActivity extends FetchTokenActivity {
         mInfoText = (TextView)findViewById(R.id.info_txt);
         mDataTypeList = (ListView)findViewById(R.id.data_type_list);
         String[] item = new String[] {
-            "Workspace grouping info"
+                "Workspace grouping info", "Exception report"
         };
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_expandable_list_item_1, item);
@@ -56,8 +56,13 @@ public class LoginActivity extends FetchTokenActivity {
             @Override
             public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
                 mDataTypeList.setEnabled(false);
-                if (arg2 == 0) {
-                    retrieveData(GetGanalyticsDataTask.DATA_TYPE_GA_GET_ALL_IDS);
+                switch (arg2) {
+                    case 0:
+                        retrieveData(GetGanalyticsDataTask.DATA_TYPE_GA_GROUPING_INFO_DIALOG);
+                        break;
+                    case 1:
+                        retrieveData(GetGanalyticsDataTask.DATA_TYPE_GA_EXCEPTIONS_REPORT_DIALOG);
+                        break;
                 }
             }
         });
@@ -66,16 +71,22 @@ public class LoginActivity extends FetchTokenActivity {
     }
 
     @Override
-    public void setGaId(final String rawData) {
-        DataGeneratorDialog dialog = DataGeneratorDialog.getNewInstance(rawData);
-        dialog.show(getFragmentManager(), DATA_GENERATOR_DIALOG_TAG);
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                onFinishRetrievingData();
-                showMessage(getString(R.string.question_info_text));
-            }
-        });
+    public void setGaId(final String rawData, int type) {
+        switch (type) {
+            case GetGanalyticsDataTask.DATA_TYPE_GA_GROUPING_INFO_DIALOG:
+                DataGeneratorDialog dialog = DataGeneratorDialog.getNewInstance(rawData);
+                dialog.show(getFragmentManager(), DATA_GENERATOR_DIALOG_TAG);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        onFinishRetrievingData();
+                        showMessage(getString(R.string.question_info_text));
+                    }
+                });
+                break;
+            case GetGanalyticsDataTask.DATA_TYPE_GA_EXCEPTIONS_REPORT_DIALOG:
+                break;
+        }
     }
 
     public void startLoading() {

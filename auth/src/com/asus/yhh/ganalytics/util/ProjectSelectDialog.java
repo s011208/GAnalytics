@@ -1,39 +1,55 @@
 
-package com.asus.yhh.ganalytics.widgets.report.exceptions;
+package com.asus.yhh.ganalytics.util;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-
-import com.asus.yhh.ganalytics.FetchTokenActivity;
 import com.asus.yhh.ganalytics.GetGanalyticsDataTask;
 import com.asus.yhh.ganalytics.R;
-import com.asus.yhh.ganalytics.login.LoadingView;
 import com.asus.yhh.ganalytics.login.LoginActivity;
 import com.asus.yhh.ganalytics.util.GAProjectDatabaseHelper;
-import com.asus.yhh.ganalytics.widgets.WidgetDataHelper;
-import com.asus.yhh.ganalytics.workspace.grouping.info.DataGeneratorDialog;
 
 import android.app.Activity;
-import android.appwidget.AppWidgetManager;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ContextThemeWrapper;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.AdapterView.OnItemSelectedListener;
 
-public class ExceptionsWidgetConfigurationActivity extends FetchTokenActivity {
+/**
+ * @author Yen-Hsun_Huang
+ */
+public abstract class ProjectSelectDialog extends DialogFragment implements
+        GetGanalyticsDataTask.GetGanalyticsDataTaskCallback {
+    private static final boolean DEBUG = true;
 
-    private LoadingView mLoadingView;
+    private static final String TAG = "ProjectSelectDialog";
+
+    public static final String BUNDLE_KEY_RAW_DATA = "b_k_raw_data";
+
+    public static final String INTENT_RAW_DATA_KEY = "RAWDATA";
+
+    private Context mContext;
+
+    private String mGaIdRawData;
+
+    private View mContentView;
+
+    private String mTitle;
 
     private String mEmail;
 
@@ -51,30 +67,28 @@ public class ExceptionsWidgetConfigurationActivity extends FetchTokenActivity {
 
     private TextView mGetReport;
 
-    private int mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
-
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Intent intent = getIntent();
-        Bundle extras = intent.getExtras();
-        if (extras != null) {
-            mAppWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID,
-                    AppWidgetManager.INVALID_APPWIDGET_ID);
-        }
-        if (mAppWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
-            setResult(Activity.RESULT_CANCELED);
-            finish();
-        }
-        setContentView(R.layout.widget_exceptions_report_config);
-        initComponents();
-        retrieveData(GetGanalyticsDataTask.DATA_TYPE_GA_GET_ALL_IDS);
+        mGaIdRawData = getArguments().getString(BUNDLE_KEY_RAW_DATA);
     }
 
-    public void initComponents() {
-        mLoadingView = (LoadingView)findViewById(R.id.loading_view);
-        mLoadingView.startLoading();
-        mGetReport = (TextView)findViewById(R.id.get_report);
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        mContext = new ContextThemeWrapper(getActivity(),
+                android.R.style.Theme_DeviceDefault_Light_Dialog);
+        mTitle = mContext.getString(R.string.workspace_grouping_info_dialog_title);
+        initDialogContent();
+        AlertDialog dialog = new AlertDialog.Builder(mContext).setView(mContentView)
+                .setCancelable(false).setTitle(mTitle).create();
+        return dialog;
+    }
+
+    private void initDialogContent() {
+        mContentView = ((LayoutInflater)mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE))
+                .inflate(R.layout.workspace_grouping_info_generator_dialog, null);
+        // confirm
+        mGetReport = (TextView)mContentView.findViewById(R.id.get_report);
         mGetReport.setEnabled(false);
         mGetReport.setOnClickListener(new OnClickListener() {
 
@@ -83,17 +97,18 @@ public class ExceptionsWidgetConfigurationActivity extends FetchTokenActivity {
                 // get ga-project id
                 String propertyId = mPropertiesIdList.get(mGaProperties.getSelectedItemPosition());
                 int gaId = Integer.valueOf(mGaIdList.get(mGaId.getSelectedItemPosition()));
-                String projectId = GAProjectDatabaseHelper.getInstance(
-                        ExceptionsWidgetConfigurationActivity.this).getProjectId(mEmail,
-                        mGaIdList.get(mGaId.getSelectedItemPosition()), propertyId);
+                String projectId = GAProjectDatabaseHelper.getInstance(mContext).getProjectId(
+                        mEmail, mGaIdList.get(mGaId.getSelectedItemPosition()), propertyId);
                 if (projectId != null) {
-                    setExceptionUrlData(projectId);
+                    getWorkspaceGroupingInfo(projectId);
                 } else {
                     String url = GetGanalyticsDataTask.GA_GET_PROJECT_ID_URL.replace("accountId",
                             String.valueOf(gaId)).replace("webPropertyId", propertyId);
-                    new GetGanalyticsDataTask(ExceptionsWidgetConfigurationActivity.this,
-                            ExceptionsWidgetConfigurationActivity.this, mEmail,
+                    new GetGanalyticsDataTask(mContext, ProjectSelectDialog.this, mEmail,
                             GetGanalyticsDataTask.DATA_TYPE_GA_GET_PROJECT_ID, url).execute();
+                    if (getActivity() != null) {
+                        ((LoginActivity)getActivity()).startLoading();
+                    }
                 }
                 mGetReport.setEnabled(false);
                 mGaProperties.setEnabled(false);
@@ -102,11 +117,16 @@ public class ExceptionsWidgetConfigurationActivity extends FetchTokenActivity {
             }
         });
         // progressbars
-        mGaPropertiesPb = (ProgressBar)findViewById(R.id.ga_properties_pb);
+        mGaPropertiesPb = (ProgressBar)mContentView.findViewById(R.id.ga_properties_pb);
         mGaPropertiesPb.setVisibility(View.GONE);
         // spinners
-        mGaId = (Spinner)findViewById(R.id.ga_id);
-
+        mGaId = (Spinner)mContentView.findViewById(R.id.ga_id);
+        String[] tempData = new String[2];
+        ArrayAdapter<String> gaIdList = new ArrayAdapter<String>(mContext,
+                android.R.layout.simple_spinner_dropdown_item, GetGanalyticsDataTask.getGaId(
+                        mGaIdRawData, mGaIdList, tempData));
+        mEmail = tempData[0];
+        mTitle = tempData[1];
         mGaId.setOnItemSelectedListener(new OnItemSelectedListener() {
 
             @Override
@@ -115,8 +135,7 @@ public class ExceptionsWidgetConfigurationActivity extends FetchTokenActivity {
                     int gaId = Integer.valueOf(mGaIdList.get(position));
                     String url = GetGanalyticsDataTask.GA_GET_IDS_PROPERTIES_URL.replace(
                             "accountId", String.valueOf(gaId));
-                    new GetGanalyticsDataTask(ExceptionsWidgetConfigurationActivity.this,
-                            ExceptionsWidgetConfigurationActivity.this, mEmail,
+                    new GetGanalyticsDataTask(mContext, ProjectSelectDialog.this, mEmail,
                             GetGanalyticsDataTask.DATA_TYPE_GA_GET_IDS_PROPERTIES, url).execute();
                     mGaProperties.setAdapter(null);
                     mGaPropertiesPb.setVisibility(View.VISIBLE);
@@ -132,23 +151,50 @@ public class ExceptionsWidgetConfigurationActivity extends FetchTokenActivity {
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
-
-        mGaProperties = (Spinner)findViewById(R.id.ga_properties);
-        mGaDuration = (Spinner)findViewById(R.id.ga_duration);
-        ArrayAdapter<String> gaDuration = new ArrayAdapter<String>(new ContextThemeWrapper(
-                getApplicationContext(), android.R.style.Theme_DeviceDefault_Light_Dialog),
+        mGaId.setAdapter(gaIdList);
+        mGaProperties = (Spinner)mContentView.findViewById(R.id.ga_properties);
+        mGaDuration = (Spinner)mContentView.findViewById(R.id.ga_duration);
+        ArrayAdapter<String> gaDuration = new ArrayAdapter<String>(mContext,
                 android.R.layout.simple_spinner_dropdown_item, DURATION_OPTIONS);
         mGaDuration.setAdapter(gaDuration);
         mGaDuration.setSelection(2);
         mGaDuration.setEnabled(false);
     }
 
-    public static String getDate(Date date) {
+    @Override
+    public void fillUpAccountProperties(String rawData) {
+        final ArrayAdapter<String> gaProperties = new ArrayAdapter<String>(mContext,
+                android.R.layout.simple_spinner_dropdown_item,
+                GetGanalyticsDataTask.getGaProperties(rawData, mPropertiesIdList));
+        if (getActivity() == null)
+            return;
+        getActivity().runOnUiThread(new Runnable() {
+
+            @Override
+            public void run() {
+                mGaProperties.setAdapter(gaProperties);
+                mGaPropertiesPb.setVisibility(View.GONE);
+            }
+        });
+    }
+
+    public String getDate(Date date) {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         return dateFormat.format(date);
     }
 
-    public void setExceptionUrlData(String projectId) {
+    @Override
+    public void setProjectId(String rawData) {
+        String projectId = GetGanalyticsDataTask.getGaProjectId(rawData);
+        if (projectId != null) {
+            String propertyId = mPropertiesIdList.get(mGaProperties.getSelectedItemPosition());
+            GAProjectDatabaseHelper.getInstance(mContext).insertNewProject(mEmail,
+                    mGaIdList.get(mGaId.getSelectedItemPosition()), propertyId, projectId);
+        }
+        getWorkspaceGroupingInfo(GetGanalyticsDataTask.getGaProjectId(rawData));
+    }
+
+    public void getWorkspaceGroupingInfo(String projectId) {
         if (projectId != null) {
             String startDate = null, endDate = null;
             Date current = new Date();
@@ -184,22 +230,35 @@ public class ExceptionsWidgetConfigurationActivity extends FetchTokenActivity {
                     + (day < 10 ? "0" + String.valueOf(day) : String.valueOf(day));
             showMessage("end date: " + endDate + ", start date: " + startDate);
             showMessage("project id: " + projectId);
-            String url = "https://www.googleapis.com/analytics/v3/data/ga?ids=ga%3A"
-                    + projectId
-                    + "&dimensions=ga%3AexceptionDescription%2Cga%3AoperatingSystemVersion%2Cga%3AappVersion&metrics=ga%3Aexceptions"
-                    + "&sort=-ga%3Aexceptions" + "&start-date=" + startDate + "&end-date="
-                    + endDate + "&max-results=10000";
-            WidgetDataHelper.getInstance(getApplicationContext()).addNewWidget(
-                    String.valueOf(mAppWidgetId), mEmail, url,
-                    WidgetDataHelper.WIDGET_TYPE_EXCEPTION_REPORT);
-            setResult(Activity.RESULT_OK);
-            finish();
-            // below for debug
-            // new GetGanalyticsDataTask(this, this, mEmail,
-            // GetGanalyticsDataTask.DATA_TYPE_WORKSPACE_GROUPING_INFO,
-            // url).execute();
+            String url = "https://www.googleapis.com/analytics/v3/data/ga?ids=ga%3A" + projectId
+                    + "&dimensions=ga%3AeventLabel&metrics=ga%3Ausers"
+                    + "&filters=ga%3AeventAction%3D%3Dgrouping%20info&max-results=10000"
+                    + "&start-date=" + startDate + "&end-date=" + endDate;
+            new GetGanalyticsDataTask(mContext, ProjectSelectDialog.this, mEmail,
+                    GetGanalyticsDataTask.DATA_TYPE_WORKSPACE_GROUPING_INFO, url).execute();
         }
     }
+
+    public void startWorkspaceGroupingInfoActivity(final String rawJsonData) {
+        showMessage("startWorkspaceGroupingInfoActivity");
+        if (getActivity() == null)
+            return;
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (rawJsonData == null || rawJsonData.length() == 0) {
+                    showMessage("parse data failed");
+                    return;
+                }
+                if (getActivity() != null) {
+                    ((LoginActivity)getActivity()).finishLoading();
+                }
+                startResultActivity(mContext, rawJsonData);
+            }
+        });
+    }
+
+    public abstract void startResultActivity(final Context context, final String rawData);
 
     @Override
     public void onRetrievingData() {
@@ -221,70 +280,32 @@ public class ExceptionsWidgetConfigurationActivity extends FetchTokenActivity {
 
     @Override
     public void showMessage(String message, boolean handlable, Exception e) {
-        // TODO Auto-generated method stub
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void showMessage(String message) {
-        // TODO Auto-generated method stub
-
+        if (DEBUG)
+            Log.d(TAG, message);
+        Activity activity = getActivity();
+        if (activity != null) {
+            ((LoginActivity)activity).showMessage(message);
+        }
     }
 
     @Override
     public void showMessage(String message, Exception e) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void setGaId(final String rawData, int type) {
-        final String[] tempData = new String[2];
-        final ArrayAdapter<String> gaIdList = new ArrayAdapter<String>(new ContextThemeWrapper(
-                getApplicationContext(), android.R.style.Theme_DeviceDefault_Light_Dialog),
-                android.R.layout.simple_spinner_dropdown_item, GetGanalyticsDataTask.getGaId(
-                        rawData, mGaIdList, tempData));
-        mEmail = tempData[0];
-        Runnable uiRunnable = new Runnable() {
-
-            @Override
-            public void run() {
-                mGaId.setAdapter(gaIdList);
-            }
-        };
-        runOnUiThread(uiRunnable);
-    }
-
-    @Override
-    public void fillUpAccountProperties(String rawData) {
-        final ArrayAdapter<String> gaProperties = new ArrayAdapter<String>(new ContextThemeWrapper(
-                getApplicationContext(), android.R.style.Theme_DeviceDefault_Light_Dialog),
-                android.R.layout.simple_spinner_dropdown_item,
-                GetGanalyticsDataTask.getGaProperties(rawData, mPropertiesIdList));
-        runOnUiThread(new Runnable() {
-
-            @Override
-            public void run() {
-                mGaProperties.setAdapter(gaProperties);
-                mGaPropertiesPb.setVisibility(View.GONE);
-            }
-        });
-    }
-
-    @Override
-    public void setProjectId(String rawData) {
-        String projectId = GetGanalyticsDataTask.getGaProjectId(rawData);
-        if (projectId != null) {
-            String propertyId = mPropertiesIdList.get(mGaProperties.getSelectedItemPosition());
-            GAProjectDatabaseHelper.getInstance(this).insertNewProject(mEmail,
-                    mGaIdList.get(mGaId.getSelectedItemPosition()), propertyId, projectId);
+        if (DEBUG)
+            Log.w(TAG, message, e);
+        Activity activity = getActivity();
+        if (activity != null) {
+            ((LoginActivity)activity).showMessage(message, e);
         }
-        setExceptionUrlData(GetGanalyticsDataTask.getGaProjectId(rawData));
     }
 
     @Override
-    public void startWorkspaceGroupingInfoActivity(String rawJsonData) {
-        // TODO Auto-generated method stub
+    public void setGaId(String rawData, int type) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
