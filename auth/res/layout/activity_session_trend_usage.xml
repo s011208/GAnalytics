@@ -13,16 +13,46 @@
         android:textColor="#ffffff"
         android:textSize="20sp" />
 
-    <!-- <ScrollView -->
-    <!-- android:layout_width="match_parent" -->
-    <!-- android:layout_height="match_parent" > -->
-
-    <LinearLayout
-        android:id="@+id/chart_list"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical" >
-    </LinearLayout>
-    <!-- </ScrollView> -->
+        android:layout_height="match_parent" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="10dp" >
+
+            <FrameLayout
+                android:id="@+id/user_container"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/session_trend_usage_chart_height" >
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/new_user_container"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/session_trend_usage_chart_height" >
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/session_container"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/session_trend_usage_chart_height" >
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/session_duration_container"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/session_trend_usage_chart_height" >
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/hits_container"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/session_trend_usage_chart_height" >
+            </FrameLayout>
+        </LinearLayout>
+    </ScrollView>
 
 </LinearLayout>

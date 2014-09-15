@@ -3,5 +3,5 @@
     <dimen name="exception_report_excetpion_textsize">14sp</dimen>
     <dimen name="exception_report_excetpion_padding">3dp</dimen>
     <dimen name="session_usage_textsize">14sp</dimen>
-
+	<dimen name="session_trend_usage_chart_height">220dp</dimen>
 </resources>

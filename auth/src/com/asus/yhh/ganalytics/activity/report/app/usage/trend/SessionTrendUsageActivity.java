@@ -21,25 +21,17 @@ import com.asus.yhh.ganalytics.util.ProjectSelectDialog;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.Paint.Align;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.BaseAdapter;
-import android.widget.LinearLayout;
-import android.widget.ListView;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 public class SessionTrendUsageActivity extends Activity {
     private String mRawData;
 
     private TextView mActivityTitle;
-
-    private LinearLayout mChartContainer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,14 +58,22 @@ public class SessionTrendUsageActivity extends Activity {
                 }
             }
         }
-        mChartContainer = (LinearLayout)findViewById(R.id.chart_list);
-        new ChartLoadingTask(this, mChartContainer, SessionTrendData.TYPE_SESSIONS).execute();
+        new ChartLoadingTask(this, (FrameLayout)findViewById(R.id.hits_container),
+                SessionTrendData.TYPE_HIT).execute();
+        new ChartLoadingTask(this, (FrameLayout)findViewById(R.id.new_user_container),
+                SessionTrendData.TYPE_NEW_USER).execute();
+        new ChartLoadingTask(this, (FrameLayout)findViewById(R.id.user_container),
+                SessionTrendData.TYPE_USER).execute();
+        new ChartLoadingTask(this, (FrameLayout)findViewById(R.id.session_duration_container),
+                SessionTrendData.TYPE_SESSION_DURATION).execute();
+        new ChartLoadingTask(this, (FrameLayout)findViewById(R.id.session_container),
+                SessionTrendData.TYPE_SESSIONS).execute();
     }
 
     public static class ChartLoadingTask extends AsyncTask<Void, Void, Void> {
         private WeakReference<Context> mContext;
 
-        private WeakReference<LinearLayout> mChartContainer;
+        private WeakReference<FrameLayout> mChartContainer;
 
         private int mChartType;
 
@@ -83,9 +83,9 @@ public class SessionTrendUsageActivity extends Activity {
 
         private XYMultipleSeriesRenderer mRenderer;
 
-        public ChartLoadingTask(Context context, LinearLayout container, int chartType) {
+        public ChartLoadingTask(Context context, FrameLayout container, int chartType) {
             mContext = new WeakReference<Context>(context);
-            mChartContainer = new WeakReference<LinearLayout>(container);
+            mChartContainer = new WeakReference<FrameLayout>(container);
             mChartType = chartType;
         }
 
@@ -94,51 +94,88 @@ public class SessionTrendUsageActivity extends Activity {
             ArrayList<String> dateData = new ArrayList<String>(SessionTrendData.DATE_DATA);
             if (dateData.isEmpty())
                 return null;
-            ArrayList<Integer> data = new ArrayList<Integer>();
+            ArrayList<Float> data = new ArrayList<Float>();
+            String chartTitle = null;
+            String chartYTitle = null;
             switch (mChartType) {
                 case SessionTrendData.TYPE_USER:
                     data.addAll(SessionTrendData.USER_DATA);
+                    chartTitle = "User chart";
+                    chartYTitle = "Users";
                     break;
                 case SessionTrendData.TYPE_NEW_USER:
                     data.addAll(SessionTrendData.NEW_USER_DATA);
+                    chartTitle = "New user chart";
+                    chartYTitle = "New users";
                     break;
                 case SessionTrendData.TYPE_SESSIONS:
                     data.addAll(SessionTrendData.SESSIONS_DATA);
+                    chartTitle = "Session chart";
+                    chartYTitle = "Sessions";
                     break;
                 case SessionTrendData.TYPE_SESSION_DURATION:
                     data.addAll(SessionTrendData.SESSION_DURATION_DATA);
+                    chartTitle = "Session duration chart";
+                    chartYTitle = "Session duration";
                     break;
                 case SessionTrendData.TYPE_HIT:
                     data.addAll(SessionTrendData.HITS_DATA);
+                    chartTitle = "Hit chart";
+                    chartYTitle = "Hits";
                     break;
             }
             if (data.isEmpty())
                 return null;
+            final float density = mContext.get().getResources().getDisplayMetrics().density;
             mDataset = new XYMultipleSeriesDataset();
             mRenderer = new XYMultipleSeriesRenderer();
             mRenderer.setApplyBackgroundColor(true);
             mRenderer.setZoomButtonsVisible(true);
-            mRenderer.setPointSize(2);
+            mRenderer.setPointSize(3 * density);
             mRenderer.setAxesColor(Color.WHITE);
-            mRenderer.setBarSpacing(0);
-            mRenderer.setChartTitle("SESSIONS CHART");
+            mRenderer.setChartTitle(chartTitle);
+            mRenderer.setChartTitleTextSize(14 * density);
+            mRenderer.setShowLegend(false);
+            mRenderer.setShowGridX(true);
+            mRenderer.setLabelsTextSize(8 * density);
+            mRenderer.setXTitle("DATE");
+            mRenderer.setXLabelsPadding(10 * density);
+            mRenderer.setXLabelsAngle(90);
+            mRenderer.setXAxisMin(0);
+            mRenderer.setYTitle(chartYTitle);
+            mRenderer.setYLabelsPadding(5 * density);
+            mRenderer.setYLabelsAngle(90);
+            mRenderer.setYAxisMin(0);
+            mRenderer.setMargins(new int[] {
+                    (int)(20 * density), (int)(20 * density), (int)(20 * density),
+                    (int)(20 * density)
+            });
             mRenderer.setAntialiasing(true);
-            for(int i=0; i<data.size(); i++){
-                XYSeries series = new XYSeries("");
-                series.add(i, data.get(i));
-                mDataset.addSeries(series);
-                XYSeriesRenderer renderer = new XYSeriesRenderer();
-                mRenderer.addSeriesRenderer(renderer);
-                // set some renderer properties
-                renderer.setPointStyle(PointStyle.CIRCLE);
-                renderer.setFillPoints(true);
-                renderer.setDisplayChartValues(true);
-                renderer.setDisplayChartValuesDistance(50);
-                renderer.setLineWidth(3);
-                renderer.setShowLegendItem(false);
-                mRenderer.addXTextLabel(i, dateData.get(i));
+            mRenderer.setBarSpacing(2 * density);
+            mRenderer.setPanEnabled(true, false);
+            mRenderer.setShowLabels(true);
+            float maxValue = data.get(0);
+            XYSeries series = new XYSeries("");
+            for (int i = 0; i < data.size(); i++) {
+                final float value = data.get(i);
+                maxValue = maxValue < value ? value : maxValue;
+                series.add(i, value);
+                if (i % 5 == 0) {
+                    mRenderer.addXTextLabel(i, dateData.get(i));
+                }
             }
-            Log.i("QQQQ", "doInBackground done");
+            XYSeriesRenderer renderer = new XYSeriesRenderer();
+            renderer.setPointStyle(PointStyle.CIRCLE);
+            renderer.setColor(Color.MAGENTA);
+            renderer.setFillPoints(true);
+            renderer.setDisplayChartValues(false);
+            renderer.setLineWidth(1 * density);
+            renderer.setShowLegendItem(false);
+            mRenderer.addSeriesRenderer(renderer);
+            mRenderer.setZoomLimits(new double[] {
+                    0, data.size(), 0, maxValue + 50
+            });
+            mDataset.addSeries(series);
             return null;
         }
 
@@ -149,7 +186,6 @@ public class SessionTrendUsageActivity extends Activity {
                 mChartContainer.get().addView(mChartView);
                 mChartView.repaint();
                 mChartContainer.get().requestLayout();
-                Log.i("QQQQ", "onPostExecute done");
             }
         }
     }

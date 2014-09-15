@@ -22,15 +22,15 @@ public class SessionTrendData {
 
     public static final ArrayList<String> DATE_DATA = new ArrayList<String>();
 
-    public static final ArrayList<Integer> USER_DATA = new ArrayList<Integer>();
+    public static final ArrayList<Float> USER_DATA = new ArrayList<Float>();
 
-    public static final ArrayList<Integer> NEW_USER_DATA = new ArrayList<Integer>();
+    public static final ArrayList<Float> NEW_USER_DATA = new ArrayList<Float>();
 
-    public static final ArrayList<Integer> SESSIONS_DATA = new ArrayList<Integer>();
+    public static final ArrayList<Float> SESSIONS_DATA = new ArrayList<Float>();
 
-    public static final ArrayList<Integer> SESSION_DURATION_DATA = new ArrayList<Integer>();
+    public static final ArrayList<Float> SESSION_DURATION_DATA = new ArrayList<Float>();
 
-    public static final ArrayList<Integer> HITS_DATA = new ArrayList<Integer>();
+    public static final ArrayList<Float> HITS_DATA = new ArrayList<Float>();
 
     public static final void processRawData(final String rawData) {
         DATE_DATA.clear();
@@ -46,11 +46,11 @@ public class SessionTrendData {
                     JSONArray data = parent.getJSONArray(i);
                     int index = 0;
                     DATE_DATA.add(data.getString(index++));
-                    USER_DATA.add(Integer.valueOf(data.getString(index++)));
-                    NEW_USER_DATA.add(Integer.valueOf(data.getString(index++)));
-                    SESSIONS_DATA.add(Integer.valueOf(data.getString(index++)));
-                    SESSION_DURATION_DATA.add(Integer.valueOf(data.getString(index++)));
-                    HITS_DATA.add(Integer.valueOf(data.getString(index++)));
+                    USER_DATA.add(Float.valueOf(data.getString(index++)));
+                    NEW_USER_DATA.add(Float.valueOf(data.getString(index++)));
+                    SESSIONS_DATA.add(Float.valueOf(data.getString(index++)));
+                    SESSION_DURATION_DATA.add(Float.valueOf(data.getString(index++)));
+                    HITS_DATA.add(Float.valueOf(data.getString(index++)));
                 } catch (Exception e) {
                 }
             }
