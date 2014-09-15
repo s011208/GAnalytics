@@ -70,6 +70,9 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
 
     public static final int DATA_TYPE_ACTIVITY_DATA_APP_EXCEPTIONS_REPORT = 7;
 
+    // session usage
+    public static final int DATA_TYPE_GA_SESSION_USAGE_DIALOG = 8;
+
     // ga properties
     public static final String GA_GET_IDS_PROPERTIES_URL = "https://www.googleapis.com/analytics/v3/management/accounts/accountId/webproperties";
 
@@ -121,6 +124,7 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
             case DATA_TYPE_GA_GET_ALL_IDS:
             case DATA_TYPE_GA_GROUPING_INFO_DIALOG:
             case DATA_TYPE_GA_EXCEPTIONS_REPORT_DIALOG:
+            case DATA_TYPE_GA_SESSION_USAGE_DIALOG:
                 mScope = GA_SCOPE;
                 mQueryString = GA_GET_ALL_IDS_URL;
                 break;
@@ -218,6 +222,7 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
                 case DATA_TYPE_GA_GET_ALL_IDS:
                 case DATA_TYPE_GA_GROUPING_INFO_DIALOG:
                 case DATA_TYPE_GA_EXCEPTIONS_REPORT_DIALOG:
+                case DATA_TYPE_GA_SESSION_USAGE_DIALOG:
                     if (mCallback != null && mCallback.get() != null) {
                         mCallback.get().setGaId(rawData, mDataType);
                     }

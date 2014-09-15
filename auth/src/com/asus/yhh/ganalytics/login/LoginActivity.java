@@ -5,6 +5,7 @@ import com.asus.yhh.ganalytics.FetchTokenActivity;
 import com.asus.yhh.ganalytics.GetGanalyticsDataTask;
 import com.asus.yhh.ganalytics.R;
 import com.asus.yhh.ganalytics.activity.report.app.exceptions.ExceptionReportDialog;
+import com.asus.yhh.ganalytics.activity.report.app.usage.session.brand.SessionUsageDialog;
 import com.asus.yhh.ganalytics.activity.report.workspace.groupinginfo.WorkspaceGroupingInfoDialog;
 import com.asus.yhh.ganalytics.util.ProjectSelectDialog;
 
@@ -31,8 +32,10 @@ public class LoginActivity extends FetchTokenActivity {
 
     public static final String APP_EXCEPTIONS_REPORT_DIALOG_TAG = "ExceptionReportDialog";
 
+    public static final String APP_SESSION_USAGE_DIALOG_TAG = "SessionUsageDialog";
+
     private static final String[] MAIN_OPTIONS = new String[] {
-            "Workspace grouping info", "Exception report"
+            "Workspace grouping info", "Exception report", "Session usage by branding"
     };
 
     // components
@@ -69,6 +72,9 @@ public class LoginActivity extends FetchTokenActivity {
                     case 1:
                         retrieveData(GetGanalyticsDataTask.DATA_TYPE_GA_EXCEPTIONS_REPORT_DIALOG);
                         break;
+                    case 2:
+                        retrieveData(GetGanalyticsDataTask.DATA_TYPE_GA_SESSION_USAGE_DIALOG);
+                        break;
                 }
             }
         });
@@ -93,6 +99,17 @@ public class LoginActivity extends FetchTokenActivity {
                 break;
             case GetGanalyticsDataTask.DATA_TYPE_GA_EXCEPTIONS_REPORT_DIALOG:
                 dialog = ExceptionReportDialog.getNewInstance(rawData);
+                dialog.show(getFragmentManager(), APP_EXCEPTIONS_REPORT_DIALOG_TAG);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        onFinishRetrievingData();
+                        showMessage(getString(R.string.question_info_text));
+                    }
+                });
+                break;
+            case GetGanalyticsDataTask.DATA_TYPE_GA_SESSION_USAGE_DIALOG:
+                dialog = SessionUsageDialog.getNewInstance(rawData);
                 dialog.show(getFragmentManager(), APP_EXCEPTIONS_REPORT_DIALOG_TAG);
                 runOnUiThread(new Runnable() {
                     @Override

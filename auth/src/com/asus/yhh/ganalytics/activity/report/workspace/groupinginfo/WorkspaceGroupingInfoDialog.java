@@ -29,7 +29,6 @@ public class WorkspaceGroupingInfoDialog extends ProjectSelectDialog {
         Intent intent = new Intent(context, ResultActivity.class);
         intent.putExtra(INTENT_RAW_DATA_KEY,
                 GetGanalyticsDataTask.getWorkspaceGroupingInfo(rawData));
-        intent.putExtra(INTENT_PROJECT_ID, mProjectId);
         context.startActivity(intent);
     }
 

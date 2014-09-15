@@ -1,8 +1,6 @@
 
 package com.asus.yhh.ganalytics.util;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -16,7 +14,6 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
@@ -43,8 +40,6 @@ public abstract class ProjectSelectDialog extends DialogFragment implements
 
     public static final String INTENT_RAW_DATA_KEY = "RAWDATA";
 
-    public static final String INTENT_PROJECT_ID = "PROJECT_ID";
-
     private Context mContext;
 
     private String mGaIdRawData;
@@ -68,8 +63,6 @@ public abstract class ProjectSelectDialog extends DialogFragment implements
     private ProgressBar mGaPropertiesPb;
 
     private TextView mGetReport;
-    
-    public String mProjectId;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -229,7 +222,6 @@ public abstract class ProjectSelectDialog extends DialogFragment implements
                     + (day < 10 ? "0" + String.valueOf(day) : String.valueOf(day));
             showMessage("end date: " + endDate + ", start date: " + startDate);
             showMessage("project id: " + projectId);
-            mProjectId = projectId;
             String url = getResultActivityDataUrl(projectId, startDate, endDate);
             new GetGanalyticsDataTask(mContext, ProjectSelectDialog.this, mEmail,
                     getResultActivityDataType(), url).execute();

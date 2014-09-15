@@ -11,6 +11,7 @@ import org.json.JSONObject;
 
 import com.asus.yhh.ganalytics.R;
 import com.asus.yhh.ganalytics.util.GAProjectDatabaseHelper;
+import com.asus.yhh.ganalytics.util.ProjectInfo;
 import com.asus.yhh.ganalytics.util.ProjectSelectDialog;
 import com.asus.yhh.ganalytics.util.Utils;
 import com.asus.yhh.ganalytics.widgets.report.exceptions.ExceptionsWidgetListService.ExceptionsReportData;
@@ -27,6 +28,9 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+/**
+ * @author Yen-Hsun_Huang
+ */
 public class ExceptionReportActivity extends Activity {
     private static final String TAG = "ExceptionReportActivity";
 
@@ -40,15 +44,12 @@ public class ExceptionReportActivity extends Activity {
 
     private ExceptionsListAdapter mExceptionsListAdapter;
 
-    private String mProjectId;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_exceptions_report);
         mRawData = getIntent().getStringExtra(ProjectSelectDialog.INTENT_RAW_DATA_KEY);
-        mProjectId = getIntent().getStringExtra(ProjectSelectDialog.INTENT_PROJECT_ID);
         initComponents();
     }
 
@@ -58,12 +59,16 @@ public class ExceptionReportActivity extends Activity {
         mExceptions = (ListView)findViewById(R.id.exceptions_report_list);
         mExceptionsListAdapter = new ExceptionsListAdapter(this, mRawData);
         mExceptions.setAdapter(mExceptionsListAdapter);
-        String[] projectInfo = GAProjectDatabaseHelper.getInstance(getApplicationContext())
-                .getAccountInfoFromProjectId(mProjectId);
-        if (projectInfo == null) {
-            mActivityTitle.setVisibility(View.GONE);
-        } else {
-            mActivityTitle.setText(projectInfo[0] + "\n" + projectInfo[2]);
+        ProjectInfo pInfo = ProjectInfo.getProjectInfo(mRawData);
+        if (pInfo != null) {
+            String[] projectInfo = GAProjectDatabaseHelper.getInstance(getApplicationContext())
+                    .getAccountInfoFromProjectId(pInfo.mProfileId);
+            if (projectInfo == null) {
+                mActivityTitle.setVisibility(View.GONE);
+            } else {
+                mActivityTitle.setText(projectInfo[0] + "\n" + projectInfo[2] + "\n"
+                        + pInfo.mProfileName);
+            }
         }
         mUpdateTime.setText(Utils.getRoughlyDate(new Date()));
     }

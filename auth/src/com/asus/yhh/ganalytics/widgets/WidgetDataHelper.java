@@ -11,6 +11,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Build;
 import android.util.Log;
 
+/**
+ * @author Yen-Hsun_Huang
+ */
 public class WidgetDataHelper extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
 

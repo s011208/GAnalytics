@@ -1,5 +1,5 @@
 
-package com.asus.yhh.ganalytics.activity.report.app.exceptions;
+package com.asus.yhh.ganalytics.activity.report.app.usage.session.brand;
 
 import android.content.Context;
 import android.content.Intent;
@@ -11,13 +11,10 @@ import com.asus.yhh.ganalytics.util.ProjectSelectDialog;
 /**
  * @author Yen-Hsun_Huang
  */
-public class ExceptionReportDialog extends ProjectSelectDialog {
-    private static final boolean DEBUG = true;
+public class SessionUsageDialog extends ProjectSelectDialog {
 
-    private static final String TAG = "ExceptionReportDialog";
-
-    public static ExceptionReportDialog getNewInstance(final String rawData) {
-        ExceptionReportDialog instance = new ExceptionReportDialog();
+    public static SessionUsageDialog getNewInstance(final String rawData) {
+        SessionUsageDialog instance = new SessionUsageDialog();
         Bundle args = new Bundle();
         args.putString(BUNDLE_KEY_RAW_DATA, rawData);
         instance.setArguments(args);
@@ -26,7 +23,7 @@ public class ExceptionReportDialog extends ProjectSelectDialog {
 
     @Override
     public void startResultActivity(final Context context, final String rawData) {
-        Intent intent = new Intent(context, ExceptionReportActivity.class);
+        Intent intent = new Intent(context, SessionUsageReportActivity.class);
         intent.putExtra(INTENT_RAW_DATA_KEY, rawData);
         context.startActivity(intent);
     }
@@ -35,9 +32,9 @@ public class ExceptionReportDialog extends ProjectSelectDialog {
     public String getResultActivityDataUrl(String projectId, String startDate, String endDate) {
         return "https://www.googleapis.com/analytics/v3/data/ga?ids=ga%3A"
                 + projectId
-                + "&dimensions=ga%3AexceptionDescription%2Cga%3AoperatingSystemVersion%2Cga%3AappVersion&metrics=ga%3Aexceptions"
-                + "&sort=-ga%3Aexceptions" + "&start-date=" + startDate + "&end-date=" + endDate
-                + "&max-results=10000";
+                + "&dimensions=ga%3AmobileDeviceInfo%2Cga%3AmobileDeviceBranding%2Cga%3AdeviceCategory"
+                + "&metrics=ga%3Asessions%2Cga%3Ausers&sort=-ga%3Asessions" + "&start-date="
+                + startDate + "&end-date=" + endDate + "&max-results=10000";
     }
 
     @Override
