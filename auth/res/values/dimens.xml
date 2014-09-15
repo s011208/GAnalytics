@@ -1,0 +1,6 @@
+<resources>
+
+    <dimen name="exception_report_excetpion_textsize">14sp</dimen>
+    <dimen name="exception_report_excetpion_padding">3dp</dimen>
+
+</resources>
