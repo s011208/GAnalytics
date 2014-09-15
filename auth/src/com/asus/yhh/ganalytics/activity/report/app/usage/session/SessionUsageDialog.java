@@ -1,5 +1,5 @@
 
-package com.asus.yhh.ganalytics.activity.report.app.usage.session.brand;
+package com.asus.yhh.ganalytics.activity.report.app.usage.session;
 
 import android.content.Context;
 import android.content.Intent;
@@ -32,7 +32,7 @@ public class SessionUsageDialog extends ProjectSelectDialog {
     public String getResultActivityDataUrl(String projectId, String startDate, String endDate) {
         return "https://www.googleapis.com/analytics/v3/data/ga?ids=ga%3A"
                 + projectId
-                + "&dimensions=ga%3AmobileDeviceInfo%2Cga%3AmobileDeviceBranding%2Cga%3AdeviceCategory"
+                + "&dimensions=ga%3AmobileDeviceInfo%2Cga%3AmobileDeviceBranding%2Cga%3AdeviceCategory%2Cga%3Acontinent%2Cga%3Acountry"
                 + "&metrics=ga%3Asessions%2Cga%3Ausers&sort=-ga%3Asessions" + "&start-date="
                 + startDate + "&end-date=" + endDate + "&max-results=10000";
     }

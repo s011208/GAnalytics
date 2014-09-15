@@ -1,5 +1,5 @@
 
-package com.asus.yhh.ganalytics.activity.report.app.usage.session.brand;
+package com.asus.yhh.ganalytics.activity.report.app.usage.session;
 
 import com.asus.yhh.ganalytics.R;
 import com.asus.yhh.ganalytics.util.GAProjectDatabaseHelper;
@@ -12,7 +12,6 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.TextView;
@@ -26,7 +25,7 @@ public class SessionUsageReportActivity extends FragmentActivity {
     private static final boolean DEBUG = true;
 
     private static final String[] PAGER_TITLE = new String[] {
-            "All data", "By branding"
+            "All data", "By branding", "By country", "By continent"
     };
 
     private String mRawData;
@@ -77,13 +76,17 @@ public class SessionUsageReportActivity extends FragmentActivity {
                 return new RawDataReportFragment();
             } else if (position == 1) {
                 return new BrandReportFragment();
+            } else if (position == 2) {
+                return new CountryReportFragment();
+            } else if (position == 3) {
+                return new ContinentReportFragment();
             }
             return null;
         }
 
         @Override
         public int getCount() {
-            return 2;
+            return 4;
         }
 
         @Override

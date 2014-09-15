@@ -5,7 +5,7 @@ import com.asus.yhh.ganalytics.FetchTokenActivity;
 import com.asus.yhh.ganalytics.GetGanalyticsDataTask;
 import com.asus.yhh.ganalytics.R;
 import com.asus.yhh.ganalytics.activity.report.app.exceptions.ExceptionReportDialog;
-import com.asus.yhh.ganalytics.activity.report.app.usage.session.brand.SessionUsageDialog;
+import com.asus.yhh.ganalytics.activity.report.app.usage.session.SessionUsageDialog;
 import com.asus.yhh.ganalytics.activity.report.workspace.groupinginfo.WorkspaceGroupingInfoDialog;
 import com.asus.yhh.ganalytics.util.ProjectSelectDialog;
 
@@ -35,7 +35,7 @@ public class LoginActivity extends FetchTokenActivity {
     public static final String APP_SESSION_USAGE_DIALOG_TAG = "SessionUsageDialog";
 
     private static final String[] MAIN_OPTIONS = new String[] {
-            "Workspace grouping info", "Exception report", "Session usage by branding"
+            "Workspace grouping info", "Exception report", "Session usage"
     };
 
     // components

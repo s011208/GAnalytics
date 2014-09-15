@@ -38,6 +38,34 @@
         android:orientation="horizontal" >
 
         <TextView
+            android:id="@+id/data_device_continent"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/cell_background"
+            android:gravity="center_vertical"
+            android:padding="2dp"
+            android:textColor="@color/activity_report_text_color"
+            android:textSize="@dimen/session_usage_textsize" />
+
+        <TextView
+            android:id="@+id/data_device_country"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/cell_background"
+            android:gravity="center_vertical"
+            android:padding="2dp"
+            android:textColor="@color/activity_report_text_color"
+            android:textSize="@dimen/session_usage_textsize" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
+        <TextView
             android:id="@+id/data_device_category"
             android:layout_width="0dp"
             android:layout_height="match_parent"
