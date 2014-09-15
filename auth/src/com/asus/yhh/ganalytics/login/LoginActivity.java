@@ -6,6 +6,7 @@ import com.asus.yhh.ganalytics.GetGanalyticsDataTask;
 import com.asus.yhh.ganalytics.R;
 import com.asus.yhh.ganalytics.activity.report.app.exceptions.ExceptionReportDialog;
 import com.asus.yhh.ganalytics.activity.report.app.usage.session.SessionUsageDialog;
+import com.asus.yhh.ganalytics.activity.report.app.usage.trend.SessionTrendUsageDialog;
 import com.asus.yhh.ganalytics.activity.report.workspace.groupinginfo.WorkspaceGroupingInfoDialog;
 import com.asus.yhh.ganalytics.util.ProjectSelectDialog;
 
@@ -34,8 +35,10 @@ public class LoginActivity extends FetchTokenActivity {
 
     public static final String APP_SESSION_USAGE_DIALOG_TAG = "SessionUsageDialog";
 
+    public static final String APP_SESSION_TREND_USAGE_DIALOG_TAG = "SessionTrendUsageDialog";
+
     private static final String[] MAIN_OPTIONS = new String[] {
-            "Workspace grouping info", "Exception report", "Session usage"
+            "Workspace grouping info", "Exception report", "Session usage", "Session trend usage"
     };
 
     // components
@@ -64,7 +67,6 @@ public class LoginActivity extends FetchTokenActivity {
 
             @Override
             public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-                mDataTypeList.setEnabled(false);
                 switch (arg2) {
                     case 0:
                         retrieveData(GetGanalyticsDataTask.DATA_TYPE_GA_GROUPING_INFO_DIALOG);
@@ -75,7 +77,13 @@ public class LoginActivity extends FetchTokenActivity {
                     case 2:
                         retrieveData(GetGanalyticsDataTask.DATA_TYPE_GA_SESSION_USAGE_DIALOG);
                         break;
+                    case 3:
+                        retrieveData(GetGanalyticsDataTask.DATA_TYPE_GA_SESSION_TREND_USAGE_DIALOG);
+                        break;
+                    default:
+                        return;
                 }
+                mDataTypeList.setEnabled(false);
             }
         });
         mLoadingView = (LoadingView)findViewById(R.id.loading_view);
@@ -110,7 +118,18 @@ public class LoginActivity extends FetchTokenActivity {
                 break;
             case GetGanalyticsDataTask.DATA_TYPE_GA_SESSION_USAGE_DIALOG:
                 dialog = SessionUsageDialog.getNewInstance(rawData);
-                dialog.show(getFragmentManager(), APP_EXCEPTIONS_REPORT_DIALOG_TAG);
+                dialog.show(getFragmentManager(), APP_SESSION_USAGE_DIALOG_TAG);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        onFinishRetrievingData();
+                        showMessage(getString(R.string.question_info_text));
+                    }
+                });
+                break;
+            case GetGanalyticsDataTask.DATA_TYPE_GA_SESSION_TREND_USAGE_DIALOG:
+                dialog = SessionTrendUsageDialog.getNewInstance(rawData);
+                dialog.show(getFragmentManager(), APP_SESSION_TREND_USAGE_DIALOG_TAG);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {

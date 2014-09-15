@@ -39,7 +39,7 @@ public class SessionUsageDialog extends ProjectSelectDialog {
 
     @Override
     public int getResultActivityDataType() {
-        return GetGanalyticsDataTask.DATA_TYPE_ACTIVITY_DATA_APP_EXCEPTIONS_REPORT;
+        return GetGanalyticsDataTask.DATA_TYPE_SET_ACTIVITY_RESULT;
     }
 
 }

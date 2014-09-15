@@ -55,7 +55,7 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
     // ga worpsace grouping info
     public static final String WORKSPACE_GROUPING_INFO_URL = "https://www.googleapis.com/analytics/v3/data/ga?ids=ga%3A90502076&dimensions=ga%3AeventLabel&metrics=ga%3Ausers&filters=ga%3AeventAction%3D%3Dgrouping%20info&start-date=2014-07-01&end-date=2014-09-11&max-results=10000";
 
-    public static final int DATA_TYPE_ACTIVITY_DATA_WORKSPACE_GROUPING_INFO = 0;
+    public static final int DATA_TYPE_SET_ACTIVITY_RESULT = 0;
 
     // ga id
     public static final String GA_GET_ALL_IDS_URL = "https://www.googleapis.com/analytics/v3/management/accounts";
@@ -68,10 +68,11 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
     // exceptions report dialog
     public static final int DATA_TYPE_GA_EXCEPTIONS_REPORT_DIALOG = 3;
 
-    public static final int DATA_TYPE_ACTIVITY_DATA_APP_EXCEPTIONS_REPORT = 7;
-
     // session usage
     public static final int DATA_TYPE_GA_SESSION_USAGE_DIALOG = 8;
+
+    // session usage trend
+    public static final int DATA_TYPE_GA_SESSION_TREND_USAGE_DIALOG = 9;
 
     // ga properties
     public static final String GA_GET_IDS_PROPERTIES_URL = "https://www.googleapis.com/analytics/v3/management/accounts/accountId/webproperties";
@@ -86,8 +87,6 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
     // ga exceptions report
 
     public static final String GA_EXCEPTIONS_REPORT = WORKSPACE_GROUPING_INFO_URL;// whatever
-
-    public static final int DATA_TYPE_GA_EXCEPTIONS_REPORT = 6;
 
     protected String mScope;
 
@@ -116,8 +115,7 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
         mUserAccount = email;
         mDataType = dataType;
         switch (mDataType) {
-            case DATA_TYPE_ACTIVITY_DATA_WORKSPACE_GROUPING_INFO:
-            case DATA_TYPE_ACTIVITY_DATA_APP_EXCEPTIONS_REPORT:
+            case DATA_TYPE_SET_ACTIVITY_RESULT:
                 mScope = GA_SCOPE;
                 mQueryString = WORKSPACE_GROUPING_INFO_URL;
                 break;
@@ -125,6 +123,7 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
             case DATA_TYPE_GA_GROUPING_INFO_DIALOG:
             case DATA_TYPE_GA_EXCEPTIONS_REPORT_DIALOG:
             case DATA_TYPE_GA_SESSION_USAGE_DIALOG:
+            case DATA_TYPE_GA_SESSION_TREND_USAGE_DIALOG:
                 mScope = GA_SCOPE;
                 mQueryString = GA_GET_ALL_IDS_URL;
                 break;
@@ -133,10 +132,6 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
                 mQueryString = GA_GET_IDS_PROPERTIES_URL;
                 break;
             case DATA_TYPE_GA_GET_PROJECT_ID:
-                mScope = GA_SCOPE;
-                mQueryString = GA_GET_PROJECT_ID_URL;
-                break;
-            case DATA_TYPE_GA_EXCEPTIONS_REPORT:
                 mScope = GA_SCOPE;
                 mQueryString = GA_GET_PROJECT_ID_URL;
                 break;
@@ -212,9 +207,7 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
             if (DEBUG)
                 Log.d(TAG, rawData);
             switch (mDataType) {
-                case DATA_TYPE_ACTIVITY_DATA_WORKSPACE_GROUPING_INFO:
-                case DATA_TYPE_ACTIVITY_DATA_APP_EXCEPTIONS_REPORT:
-                case DATA_TYPE_GA_EXCEPTIONS_REPORT:
+                case DATA_TYPE_SET_ACTIVITY_RESULT:
                     if (mCallback != null && mCallback.get() != null) {
                         mCallback.get().setResultData(rawData);
                     }
@@ -223,6 +216,7 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
                 case DATA_TYPE_GA_GROUPING_INFO_DIALOG:
                 case DATA_TYPE_GA_EXCEPTIONS_REPORT_DIALOG:
                 case DATA_TYPE_GA_SESSION_USAGE_DIALOG:
+                case DATA_TYPE_GA_SESSION_TREND_USAGE_DIALOG:
                     if (mCallback != null && mCallback.get() != null) {
                         mCallback.get().setGaId(rawData, mDataType);
                     }

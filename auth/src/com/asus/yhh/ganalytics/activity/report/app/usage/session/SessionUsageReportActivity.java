@@ -40,7 +40,7 @@ public class SessionUsageReportActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_session_usage_brand);
+        setContentView(R.layout.activity_session_usage_all);
         mRawData = getIntent().getStringExtra(ProjectSelectDialog.INTENT_RAW_DATA_KEY);
         SessionUsageData.getSessionUsageData(mRawData);
         initComponents();

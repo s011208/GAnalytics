@@ -34,7 +34,7 @@ public class WorkspaceGroupingInfoDialog extends ProjectSelectDialog {
 
     @Override
     public int getResultActivityDataType() {
-        return GetGanalyticsDataTask.DATA_TYPE_ACTIVITY_DATA_WORKSPACE_GROUPING_INFO;
+        return GetGanalyticsDataTask.DATA_TYPE_SET_ACTIVITY_RESULT;
     }
 
     @Override

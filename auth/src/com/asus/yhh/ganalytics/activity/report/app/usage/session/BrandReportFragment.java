@@ -20,7 +20,7 @@ public class BrandReportFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         ViewGroup rootView = (ViewGroup)inflater.inflate(
-                R.layout.activity_session_usage_brand_whole_data, container, false);
+                R.layout.activity_session_usage_all_data, container, false);
         mDataList = (ListView)rootView.findViewById(R.id.data_list);
         mDataListAdapter = new SessionUsageDataListAdapter(getActivity(),
                 SessionUsageData.getBrandingList());

@@ -93,7 +93,7 @@ public class SessionUsageDataListAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder = null;
         if (convertView == null) {
-            convertView = mInflater.inflate(R.layout.activity_session_usage_brand_whole_data_row,
+            convertView = mInflater.inflate(R.layout.activity_session_usage_all_data_row,
                     null);
             holder = new ViewHolder();
             holder.mDeviceBranding = (TextView)convertView.findViewById(R.id.data_device_brand);

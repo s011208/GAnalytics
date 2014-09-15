@@ -32,12 +32,10 @@
             </intent-filter>
         </activity>
         <!-- result activities start -->
-        <activity android:name="com.asus.yhh.ganalytics.activity.report.workspace.groupinginfo.ResultActivity" >
-        </activity>
-        <activity android:name="com.asus.yhh.ganalytics.activity.report.app.exceptions.ExceptionReportActivity" >
-        </activity>
-        <activity android:name="com.asus.yhh.ganalytics.activity.report.app.usage.session.SessionUsageReportActivity" >
-        </activity>
+        <activity android:name="com.asus.yhh.ganalytics.activity.report.workspace.groupinginfo.ResultActivity" />
+        <activity android:name="com.asus.yhh.ganalytics.activity.report.app.exceptions.ExceptionReportActivity" />
+        <activity android:name="com.asus.yhh.ganalytics.activity.report.app.usage.session.SessionUsageReportActivity" />
+        <activity android:name="com.asus.yhh.ganalytics.activity.report.app.usage.trend.SessionTrendUsageActivity" />
         <!-- result activities end -->
         <!-- exceptions report widget start -->
         <receiver

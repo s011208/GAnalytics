@@ -128,7 +128,7 @@ public class ExceptionWidgetLoadingService extends Service {
                             // TODO Auto-generated method stub
 
                         }
-                    }, email, GetGanalyticsDataTask.DATA_TYPE_GA_EXCEPTIONS_REPORT, url).execute();
+                    }, email, GetGanalyticsDataTask.DATA_TYPE_SET_ACTIVITY_RESULT, url).execute();
         }
     }
 
