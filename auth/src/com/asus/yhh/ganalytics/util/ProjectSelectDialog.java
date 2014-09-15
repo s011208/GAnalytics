@@ -241,7 +241,7 @@ public abstract class ProjectSelectDialog extends DialogFragment implements
 
     public abstract int getResultActivityDataType();
 
-    public void setResultActivityData(final String rawJsonData) {
+    public void setResultData(final String rawJsonData) {
         showMessage("startWorkspaceGroupingInfoActivity");
         if (getActivity() == null)
             return;
@@ -307,11 +307,6 @@ public abstract class ProjectSelectDialog extends DialogFragment implements
 
     @Override
     public void setGaId(String rawData, int type) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void getExceptionsReport(String rawData) {
         throw new UnsupportedOperationException();
     }
 }

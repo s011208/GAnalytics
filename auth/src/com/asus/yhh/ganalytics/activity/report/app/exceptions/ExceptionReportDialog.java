@@ -41,7 +41,7 @@ public class ExceptionReportDialog extends ProjectSelectDialog {
 
     @Override
     public int getResultActivityDataType() {
-        return GetGanalyticsDataTask.DATE_TYPE_ACTIVITY_DATA_APP_EXCEPTIONS_REPORT;
+        return GetGanalyticsDataTask.DATA_TYPE_ACTIVITY_DATA_APP_EXCEPTIONS_REPORT;
     }
 
 }

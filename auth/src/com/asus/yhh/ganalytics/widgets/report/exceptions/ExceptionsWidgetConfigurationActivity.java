@@ -1,8 +1,6 @@
 
 package com.asus.yhh.ganalytics.widgets.report.exceptions;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -10,18 +8,16 @@ import java.util.Date;
 import com.asus.yhh.ganalytics.FetchTokenActivity;
 import com.asus.yhh.ganalytics.GetGanalyticsDataTask;
 import com.asus.yhh.ganalytics.R;
-import com.asus.yhh.ganalytics.activity.report.workspace.groupinginfo.WorkspaceGroupingInfoDialog;
 import com.asus.yhh.ganalytics.login.LoadingView;
-import com.asus.yhh.ganalytics.login.LoginActivity;
 import com.asus.yhh.ganalytics.util.GAProjectDatabaseHelper;
 import com.asus.yhh.ganalytics.util.Utils;
 import com.asus.yhh.ganalytics.widgets.WidgetDataHelper;
 
 import android.app.Activity;
 import android.appwidget.AppWidgetManager;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -32,7 +28,11 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemSelectedListener;
 
+/**
+ * @author Yen-Hsun_Huang
+ */
 public class ExceptionsWidgetConfigurationActivity extends FetchTokenActivity {
+    private static final String TAG = "";
 
     private LoadingView mLoadingView;
 
@@ -217,20 +217,17 @@ public class ExceptionsWidgetConfigurationActivity extends FetchTokenActivity {
 
     @Override
     public void showMessage(String message, boolean handlable, Exception e) {
-        // TODO Auto-generated method stub
-
+        Log.d(TAG, message);
     }
 
     @Override
     public void showMessage(String message) {
-        // TODO Auto-generated method stub
-
+        showMessage(message, null);
     }
 
     @Override
     public void showMessage(String message, Exception e) {
-        // TODO Auto-generated method stub
-
+        showMessage(message, false, e);
     }
 
     @Override
@@ -279,12 +276,7 @@ public class ExceptionsWidgetConfigurationActivity extends FetchTokenActivity {
     }
 
     @Override
-    public void setResultActivityData(String rawJsonData) {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public void getExceptionsReport(String rawData) {
+    public void setResultData(String rawJsonData) {
         throw new UnsupportedOperationException();
     }
 }

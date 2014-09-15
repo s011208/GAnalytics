@@ -1,10 +1,6 @@
 
 package com.asus.yhh.ganalytics.widgets.report.exceptions;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 
 import org.json.JSONArray;
@@ -21,6 +17,9 @@ import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
+/**
+ * @author Yen-Hsun_Huang
+ */
 public class ExceptionsWidgetListService extends RemoteViewsService {
     public static final boolean DEBUG = false;
 

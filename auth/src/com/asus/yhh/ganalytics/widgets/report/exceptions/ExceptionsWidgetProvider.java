@@ -10,10 +10,12 @@ import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 
+/**
+ * @author Yen-Hsun_Huang
+ */
 public class ExceptionsWidgetProvider extends AppWidgetProvider {
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {

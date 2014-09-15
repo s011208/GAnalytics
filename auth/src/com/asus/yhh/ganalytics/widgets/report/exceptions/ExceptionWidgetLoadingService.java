@@ -1,8 +1,6 @@
 
 package com.asus.yhh.ganalytics.widgets.report.exceptions;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import com.asus.yhh.ganalytics.GetGanalyticsDataTask;
@@ -16,6 +14,9 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.util.Log;
 
+/**
+ * @author Yen-Hsun_Huang
+ */
 public class ExceptionWidgetLoadingService extends Service {
     private static final String TAG = "ExceptionWidgetLoadingService";
 
@@ -70,9 +71,14 @@ public class ExceptionWidgetLoadingService extends Service {
                     new GetGanalyticsDataTask.GetGanalyticsDataTaskCallback() {
 
                         @Override
-                        public void setResultActivityData(String rawJsonData) {
-                            // TODO Auto-generated method stub
-
+                        public void setResultData(String rawData) {
+                            if (rawData == null || rawData.isEmpty())
+                                return;
+                            String updateDate = Utils.getDetailedDate(new Date());
+                            WidgetDataHelper.getInstance(getApplicationContext()).updateContent(
+                                    String.valueOf(id), updateDate, rawData, null);
+                            ExceptionsWidgetProvider
+                                    .performUpdate(getApplicationContext(), awm, id);
                         }
 
                         @Override
@@ -115,17 +121,6 @@ public class ExceptionWidgetLoadingService extends Service {
                         public void onFinishRetrievingData() {
                             // TODO Auto-generated method stub
 
-                        }
-
-                        @Override
-                        public void getExceptionsReport(final String rawData) {
-                            if (rawData == null || rawData.isEmpty())
-                                return;
-                            String updateDate = Utils.getDetailedDate(new Date());
-                            WidgetDataHelper.getInstance(getApplicationContext()).updateContent(
-                                    String.valueOf(id), updateDate, rawData, null);
-                            ExceptionsWidgetProvider
-                                    .performUpdate(getApplicationContext(), awm, id);
                         }
 
                         @Override

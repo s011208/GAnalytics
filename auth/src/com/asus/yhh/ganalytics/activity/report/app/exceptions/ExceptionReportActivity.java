@@ -7,11 +7,13 @@ import java.util.Date;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.asus.yhh.ganalytics.R;
 import com.asus.yhh.ganalytics.util.GAProjectDatabaseHelper;
 import com.asus.yhh.ganalytics.util.ProjectSelectDialog;
 import com.asus.yhh.ganalytics.util.Utils;
+import com.asus.yhh.ganalytics.widgets.report.exceptions.ExceptionsWidgetListService.ExceptionsReportData;
 
 import android.app.Activity;
 import android.content.Context;
@@ -89,7 +91,8 @@ public class ExceptionReportActivity extends Activity {
             if (mRawData != null && mRawData.length() > 0) {
                 mData.clear();
                 try {
-                    JSONArray pArray = new JSONArray(mRawData);
+                    JSONObject parent = new JSONObject(mRawData);
+                    JSONArray pArray = parent.getJSONArray("rows");
                     for (int i = 0; i < pArray.length(); i++) {
                         JSONArray jChild = pArray.getJSONArray(i);
                         mData.add(new ExceptionsReportData(jChild.getString(0),

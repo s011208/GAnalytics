@@ -170,12 +170,7 @@ public class LoginActivity extends FetchTokenActivity {
     }
 
     @Override
-    public void setResultActivityData(String rawJsonData) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void getExceptionsReport(String rawData) {
+    public void setResultData(String rawJsonData) {
         throw new UnsupportedOperationException();
     }
 }

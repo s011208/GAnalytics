@@ -42,9 +42,7 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
 
         public void setProjectId(final String rawData);
 
-        public void setResultActivityData(final String rawJsonData);
-
-        public void getExceptionsReport(final String rawData);
+        public void setResultData(final String rawJsonData);
     }
 
     private static final String TAG = "GetGanalyticsDataTask";
@@ -70,7 +68,7 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
     // exceptions report dialog
     public static final int DATA_TYPE_GA_EXCEPTIONS_REPORT_DIALOG = 3;
 
-    public static final int DATE_TYPE_ACTIVITY_DATA_APP_EXCEPTIONS_REPORT = 7;
+    public static final int DATA_TYPE_ACTIVITY_DATA_APP_EXCEPTIONS_REPORT = 7;
 
     // ga properties
     public static final String GA_GET_IDS_PROPERTIES_URL = "https://www.googleapis.com/analytics/v3/management/accounts/accountId/webproperties";
@@ -116,10 +114,11 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
         mDataType = dataType;
         switch (mDataType) {
             case DATA_TYPE_ACTIVITY_DATA_WORKSPACE_GROUPING_INFO:
-            case DATE_TYPE_ACTIVITY_DATA_APP_EXCEPTIONS_REPORT:
+            case DATA_TYPE_ACTIVITY_DATA_APP_EXCEPTIONS_REPORT:
                 mScope = GA_SCOPE;
                 mQueryString = WORKSPACE_GROUPING_INFO_URL;
                 break;
+            case DATA_TYPE_GA_GET_ALL_IDS:
             case DATA_TYPE_GA_GROUPING_INFO_DIALOG:
             case DATA_TYPE_GA_EXCEPTIONS_REPORT_DIALOG:
                 mScope = GA_SCOPE;
@@ -205,16 +204,18 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
         Log.i(TAG, "response code: " + sc);
         if (sc == 200) {
             InputStream is = con.getInputStream();
-            final String rawData = readResponse(is);
+            String rawData = readResponse(is);
             if (DEBUG)
                 Log.d(TAG, rawData);
             switch (mDataType) {
                 case DATA_TYPE_ACTIVITY_DATA_WORKSPACE_GROUPING_INFO:
-                case DATE_TYPE_ACTIVITY_DATA_APP_EXCEPTIONS_REPORT:
+                case DATA_TYPE_ACTIVITY_DATA_APP_EXCEPTIONS_REPORT:
+                case DATA_TYPE_GA_EXCEPTIONS_REPORT:
                     if (mCallback != null && mCallback.get() != null) {
-                        mCallback.get().setResultActivityData(getWorkspaceGroupingInfo(rawData));
+                        mCallback.get().setResultData(rawData);
                     }
                     break;
+                case DATA_TYPE_GA_GET_ALL_IDS:
                 case DATA_TYPE_GA_GROUPING_INFO_DIALOG:
                 case DATA_TYPE_GA_EXCEPTIONS_REPORT_DIALOG:
                     if (mCallback != null && mCallback.get() != null) {
@@ -229,11 +230,6 @@ public class GetGanalyticsDataTask extends AsyncTask<Void, Void, Void> {
                 case DATA_TYPE_GA_GET_PROJECT_ID:
                     if (mCallback != null && mCallback.get() != null) {
                         mCallback.get().setProjectId(rawData);
-                    }
-                    break;
-                case DATA_TYPE_GA_EXCEPTIONS_REPORT:
-                    if (mCallback != null && mCallback.get() != null) {
-                        mCallback.get().getExceptionsReport(rawData);
                     }
                     break;
             }
