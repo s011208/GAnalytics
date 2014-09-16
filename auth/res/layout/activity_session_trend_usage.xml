@@ -57,6 +57,20 @@
                 android:layout_height="@dimen/session_trend_usage_chart_height"
                 android:layout_margin="@dimen/line_chart_container_margin" >
             </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/screen_view_per_session_container"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/session_trend_usage_chart_height"
+                android:layout_margin="@dimen/line_chart_container_margin" >
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/screen_view_duration_container"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/session_trend_usage_chart_height"
+                android:layout_margin="@dimen/line_chart_container_margin" >
+            </FrameLayout>
         </LinearLayout>
     </ScrollView>
 

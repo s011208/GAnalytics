@@ -32,7 +32,7 @@ public class SessionTrendUsageDialog extends ProjectSelectDialog {
     public String getResultActivityDataUrl(String projectId, String startDate, String endDate) {
         return "https://www.googleapis.com/analytics/v3/data/ga?ids=ga%3A"
                 + projectId
-                + "&dimensions=ga%3Adate&metrics=ga%3Ausers%2Cga%3AnewUsers%2Cga%3Asessions%2Cga%3AsessionDuration%2Cga%3AavgSessionDuration%2Cga%3Ahits"
+                + "&dimensions=ga%3Adate%2Cga%3AappVersion&metrics=ga%3Asessions%2Cga%3Ausers%2Cga%3AnewUsers%2Cga%3Ahits%2Cga%3AavgSessionDuration%2Cga%3AscreenviewsPerSession%2Cga%3AavgScreenviewDuration"
                 + "&start-date=" + startDate + "&end-date=" + endDate + "&max-results=10000";
     }
 

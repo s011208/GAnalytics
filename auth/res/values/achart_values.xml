@@ -9,4 +9,5 @@
 	<dimen name="line_chart_bar_spacing">2dp</dimen>
 	<dimen name="line_chart_line_width">2dp</dimen>
 	<dimen name="line_chart_container_margin">10dp</dimen>
-	<dimen name="line_chart_point_value_spacing">10dp</dimen></resources>
+	<dimen name="line_chart_point_value_spacing">10dp</dimen>
+	<dimen name="line_chart_point_value_textsize">10sp</dimen></resources>
