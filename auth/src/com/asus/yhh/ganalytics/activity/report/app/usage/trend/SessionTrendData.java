@@ -49,8 +49,8 @@ public class SessionTrendData {
                     USER_DATA.add(Float.valueOf(data.getString(index++)));
                     NEW_USER_DATA.add(Float.valueOf(data.getString(index++)));
                     SESSIONS_DATA.add(Float.valueOf(data.getString(index++)));
-                    SESSION_DURATION_DATA.add(Float.valueOf(data.getString(index++)));
                     HITS_DATA.add(Float.valueOf(data.getString(index++)));
+                    SESSION_DURATION_DATA.add(Float.valueOf(data.getString(index++)));
                 } catch (Exception e) {
                 }
             }

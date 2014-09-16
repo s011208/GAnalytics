@@ -26,31 +26,36 @@
             <FrameLayout
                 android:id="@+id/user_container"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/session_trend_usage_chart_height" >
+                android:layout_height="@dimen/session_trend_usage_chart_height"
+                android:layout_margin="@dimen/line_chart_container_margin" >
             </FrameLayout>
 
             <FrameLayout
                 android:id="@+id/new_user_container"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/session_trend_usage_chart_height" >
+                android:layout_height="@dimen/session_trend_usage_chart_height"
+                android:layout_margin="@dimen/line_chart_container_margin" >
             </FrameLayout>
 
             <FrameLayout
                 android:id="@+id/session_container"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/session_trend_usage_chart_height" >
+                android:layout_height="@dimen/session_trend_usage_chart_height"
+                android:layout_margin="@dimen/line_chart_container_margin" >
             </FrameLayout>
 
             <FrameLayout
                 android:id="@+id/session_duration_container"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/session_trend_usage_chart_height" >
+                android:layout_height="@dimen/session_trend_usage_chart_height"
+                android:layout_margin="@dimen/line_chart_container_margin" >
             </FrameLayout>
 
             <FrameLayout
                 android:id="@+id/hits_container"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/session_trend_usage_chart_height" >
+                android:layout_height="@dimen/session_trend_usage_chart_height"
+                android:layout_margin="@dimen/line_chart_container_margin" >
             </FrameLayout>
         </LinearLayout>
     </ScrollView>

@@ -2,6 +2,8 @@
 package com.asus.yhh.ganalytics.activity.report.app.usage.trend;
 
 import java.lang.ref.WeakReference;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +22,7 @@ import com.asus.yhh.ganalytics.util.ProjectSelectDialog;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -126,54 +129,76 @@ public class SessionTrendUsageActivity extends Activity {
             }
             if (data.isEmpty())
                 return null;
-            final float density = mContext.get().getResources().getDisplayMetrics().density;
+            final float rangeValue = 1.2f;
+            int labelDistance = 5;
+            final int dataSize = data.size();
+            if (dataSize / 30 <= 1) {
+                labelDistance = 5;
+            } else if (dataSize / 30 <= 3) {
+                labelDistance = 10;
+            } else if (dataSize / 30 <= 6) {
+                labelDistance = 15;
+            } else {
+                labelDistance = 30;
+            }
+
+            Resources r = mContext.get().getResources();
             mDataset = new XYMultipleSeriesDataset();
             mRenderer = new XYMultipleSeriesRenderer();
             mRenderer.setApplyBackgroundColor(true);
             mRenderer.setZoomButtonsVisible(true);
-            mRenderer.setPointSize(3 * density);
+            mRenderer.setPointSize(r.getDimension(R.dimen.line_chart_point_size));
             mRenderer.setAxesColor(Color.WHITE);
             mRenderer.setChartTitle(chartTitle);
-            mRenderer.setChartTitleTextSize(14 * density);
+            mRenderer.setChartTitleTextSize(r.getDimension(R.dimen.line_chart_title_textsize));
             mRenderer.setShowLegend(false);
             mRenderer.setShowGridX(true);
-            mRenderer.setLabelsTextSize(8 * density);
+            mRenderer.setLabelsTextSize(r.getDimension(R.dimen.line_chart_label_textsize));
             mRenderer.setXTitle("DATE");
-            mRenderer.setXLabelsPadding(10 * density);
+            mRenderer.setXLabelsPadding(r.getDimension(R.dimen.line_chart_x_label_padding));
             mRenderer.setXLabelsAngle(90);
+            mRenderer.setXLabels(0);
             mRenderer.setXAxisMin(0);
             mRenderer.setYTitle(chartYTitle);
-            mRenderer.setYLabelsPadding(5 * density);
+            mRenderer.setYLabelsPadding(r.getDimension(R.dimen.line_chart_y_label_padding));
             mRenderer.setYLabelsAngle(90);
             mRenderer.setYAxisMin(0);
+            mRenderer.setYLabels(1);
+            int margin = (int)r.getDimension(R.dimen.line_chart_margin);
             mRenderer.setMargins(new int[] {
-                    (int)(20 * density), (int)(20 * density), (int)(20 * density),
-                    (int)(20 * density)
+                    margin, margin, margin, margin
             });
             mRenderer.setAntialiasing(true);
-            mRenderer.setBarSpacing(2 * density);
-            mRenderer.setPanEnabled(true, false);
+            mRenderer.setBarSpacing(r.getDimension(R.dimen.line_chart_bar_spacing));
+            mRenderer.setPanEnabled(false, false);
             mRenderer.setShowLabels(true);
             float maxValue = data.get(0);
             XYSeries series = new XYSeries("");
-            for (int i = 0; i < data.size(); i++) {
+            for (int i = 0; i < dataSize; i++) {
                 final float value = data.get(i);
                 maxValue = maxValue < value ? value : maxValue;
                 series.add(i, value);
-                if (i % 5 == 0) {
-                    mRenderer.addXTextLabel(i, dateData.get(i));
+                if (i % labelDistance == 0 || i == dataSize - 1) {
+                    mRenderer.addXTextLabel(i, dateData.get(i).substring(4));
                 }
             }
             XYSeriesRenderer renderer = new XYSeriesRenderer();
             renderer.setPointStyle(PointStyle.CIRCLE);
+            NumberFormat formatter = new DecimalFormat("#.##");
+            renderer.setChartValuesFormat(formatter);
             renderer.setColor(Color.MAGENTA);
             renderer.setFillPoints(true);
-            renderer.setDisplayChartValues(false);
-            renderer.setLineWidth(1 * density);
+            renderer.setDisplayChartValues(true);
+            renderer.setLineWidth(r.getDimension(R.dimen.line_chart_line_width));
             renderer.setShowLegendItem(false);
+            renderer.setChartValuesSpacing(r.getDimension(R.dimen.line_chart_point_value_spacing));
             mRenderer.addSeriesRenderer(renderer);
-            mRenderer.setZoomLimits(new double[] {
-                    0, data.size(), 0, maxValue + 50
+            mRenderer.setZoomButtonsVisible(false);
+            // MRENDERER.SETZOOMLIMITS(NEW DOUBLE[] {
+            // 0, DATA.SIZE(), 0, MAXVALUE * RANGEVALUE
+            // });
+            mRenderer.setRange(new double[] {
+                    0, data.size(), 0, maxValue * rangeValue
             });
             mDataset.addSeries(series);
             return null;
@@ -184,7 +209,6 @@ public class SessionTrendUsageActivity extends Activity {
             if (mChartContainer.get() != null) {
                 mChartView = ChartFactory.getLineChartView(mContext.get(), mDataset, mRenderer);
                 mChartContainer.get().addView(mChartView);
-                mChartView.repaint();
                 mChartContainer.get().requestLayout();
             }
         }

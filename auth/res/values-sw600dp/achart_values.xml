@@ -1,0 +1,10 @@
+<resources>
+
+    <dimen name="line_chart_point_size">0dp</dimen>
+	<dimen name="line_chart_title_textsize">18sp</dimen>
+	<dimen name="line_chart_label_textsize">12sp</dimen>
+	<dimen name="line_chart_x_label_padding">20dp</dimen>
+	<dimen name="line_chart_y_label_padding">15dp</dimen>
+	<dimen name="line_chart_margin">25dp</dimen>
+	<dimen name="line_chart_bar_spacing">2dp</dimen>
+	<dimen name="line_chart_line_width">2dp</dimen></resources>
